@@ -1,0 +1,24 @@
+{
+	"Char": "Hyd",
+	"SprAn": "Hyd_SprAn.spran",
+	"RenderMode": "Sprite",
+	"CostumeCount": 1,
+	"Sprites": [
+		"Hyd_Spr00.dpspr"
+	],
+	"PalCount": 1,
+	"Palettes": [
+		{
+			"ColorsInPal": 1,
+			"Pals": [
+				"Palettes/Color00.png"
+			]
+		}
+	],
+	"StateLists": [
+		"Hyd_States00.json"
+	],
+	"Scripts": [
+		"Hyd_Script00.lua"
+	]
+}

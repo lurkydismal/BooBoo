@@ -1,0 +1,18 @@
+{
+	"Songs": [
+		{
+			"Name": "Reach Out To The Truth -In Mayonaka Arena-",
+			"Id": "BcTheme",
+			"Num": 0,
+			"File": "Sound/Music/BcTheme.wav",
+			"LoopPoint": 22.870
+		},
+		{
+			"Name": "Scraper Sky High",
+			"Id": "HydTheme",
+			"Num": 1,
+			"File": "Sound/Music/HydTheme.wav",
+			"LoopPoint": 0.0
+		}
+	]
+}

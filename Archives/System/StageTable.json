@@ -1,0 +1,26 @@
+{
+	"Stages": [
+		{
+			"Name": "Debug",
+			"Id": "Debug",
+			"Num": 99,
+			"FilePath": "",
+			"HasLuaScript": false,
+			"DrawGrid": true,
+			"ClearColor": [140, 0, 140, 255],
+			"Shaders": [],
+			"ShaderMatAssign": [],
+			"LightDir": [ -10.0, -30.0, 0.0 ],
+			"StageWidth": 25.0,
+			"MaxPlayerDistance": 12.0,
+			"GroundTypes": [
+				{
+					"FloorType": "Concrete",
+					"ShadowType": "Shadow",
+					"CustomShadowShader": "",
+					"FloorSize": 25.0
+				}
+			]
+		}
+	]
+}

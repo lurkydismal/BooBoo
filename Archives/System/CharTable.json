@@ -1,0 +1,28 @@
+{
+	"Chars": [
+		{
+			"Name_Short": "Yu",
+			"Name_Long": "Yu Narukami",
+			"Id": "Bc",
+			"Num": 0,
+			"DLCSettings": "None",
+			"MajorArchetype": "Balance",
+			"MinorArchetype": "Puppet",
+			"CanBeRandom": true,
+			"Stage": "MayonakaArena",
+			"Song": "BcTheme"
+		},
+		{
+			"Name_Short": "Hyde",
+			"Name_Long": "Hyde Kido",
+			"Id": "Hyd",
+			"Num": 1,
+			"DLCSettings": "None",
+			"MajorArchetype": "Balance",
+			"MinorArchetype": "Rushdown",
+			"CanBeRandom": true,
+			"Stage": "CrossingSection",
+			"Song": "HydTheme"
+		}
+	]
+}

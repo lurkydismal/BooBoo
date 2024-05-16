@@ -1,0 +1,25 @@
+{
+  "Char": "Bc",
+  "SprAn": "Bc_SprAn.spran",
+  "RenderMode": "Sprite",
+  "CostumeCount": 1,
+  "Sprites": [
+    "Bc_Spr.dpspr"
+  ],
+  "PalCount": 1,
+  "Palettes": [
+    {
+      "ColorsInPal": 2,
+      "Pals": [
+        "Palettes/Color00/YuPal.png",
+        "Palettes/Color00/IzPal.png"
+      ]
+    }
+  ],
+  "StateLists": [
+    "Bc_States00.json"
+  ],
+  "Scripts": [
+    "Bc_Script00.lua"
+  ]
+}

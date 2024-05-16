@@ -1,0 +1,33 @@
+{
+	"CharTable": [
+		["Bc", "Rng", "Hyd"]
+	],
+	"SongTable": [
+		"Rng",
+		"BcTheme", 
+		"HydTheme",
+		"Mute",
+	],
+	"StageTable": [
+		"Debug"
+	],
+	"RngPos": [596, 435],
+	"Positioning": [
+		{
+			"Char": "Bc",
+			"X": 490,
+			"Y": 435,
+			"ColorCount": 1,
+			"CostumeCount": 1,
+		},
+		{
+			"Char": "Hyd",
+			"X": 702,
+			"Y": 435,
+			"ColorCount": 1,
+			"CostumeCount": 1,
+		}
+	],
+	"P1Start": [0, 0],
+	"P2Start": [2, 0]
+}
