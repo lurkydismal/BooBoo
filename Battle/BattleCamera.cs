@@ -38,7 +38,7 @@ namespace BooBoo.Battle
                 default:
                 case CameraMode.Default:
                     Vector3 desiredPos = (player1.position + player2.position) / 2.0f;
-                    desiredPos.Y = desiredPos.Y >= 3.0f ? 2.5f + (desiredPos.Y - 3.0f) : 2.5f;
+                    desiredPos.Y = desiredPos.Y >= 1.0f ? desiredPos.Y + 1.5f : 2.5f;
                     desiredPos.Z = 0.0f;
                     float autoZoomAmount = (MathF.Abs(player1.GetDistanceFrom(player2).X) - 8.0f) / 1.5f;
                     if (autoZoomAmount < 0.0f)
@@ -69,6 +69,9 @@ namespace BooBoo.Battle
                                 autoZoomReturning = false;
                         }
                     }
+
+                    if (MathF.Abs(desiredPos.X) >= BattleStage.stage.stageWidth - 6.0f)
+                        desiredPos.X = (BattleStage.stage.stageWidth - 6.0f) * MathF.Sign(desiredPos.X);
 
                     Vector3 final = Vector3.Lerp(position, desiredPos, camMoveSpeed);
                     final.Z = 8.0f + autoZoom;
