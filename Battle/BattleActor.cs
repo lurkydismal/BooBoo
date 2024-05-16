@@ -155,11 +155,11 @@ namespace BooBoo.Battle
 
             opponentDist = GetDistanceFrom(opponent);
             if (MathF.Abs(opponentDist.X) > stage.maxPlayerDistance)
-                position.X = opponent.position.X + (stage.maxPlayerDistance * MathF.Sign(position.X));
+                position.X = opponent.position.X + (stage.maxPlayerDistance * -MathF.Sign(opponentDist.X));
 
             if (MathF.Abs(position.X) > stage.stageWidth)
                 position.X = stage.stageWidth * MathF.Sign(position.X);
-            Console.WriteLine(position + "\t" + velocity + "\t" + opponentDist);
+            //Console.WriteLine(position + "\t" + velocity + "\t" + opponentDist);
             #endregion
 
             #region buffer update
