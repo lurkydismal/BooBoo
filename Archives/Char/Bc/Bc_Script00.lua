@@ -57,7 +57,24 @@ function CmnBWalk_Init(actor)
 function CmnBWalk_End(actor)
 	actor:SetVelocity(0.0, 0.0)
 	end
-	
+
+function CmnJump_Init(actor)
+	local dir = actor:GetInputDir()
+	if dir == 9 then
+		actor:SetVelocity(3.0, 17.0)
+	elseif dir == 7 then
+		actor:SetVelocity(-3.0, 17.0)
+	else
+		actor:SetVelocity(0.0, 17.0)
+		end
+	actor:SetVelocityMod(0.0, -0.7)
+	end
+
+function CmnLand_Init(actor)
+	actor:SetVelocity(0.0, 0.0)
+	actor:SetVelocityMod(0.0, 0.0)
+	end
+
 function NmlAtk5C_Update(actor, frame)
 	if frame == 1 then
 		SetPersonaMove("Iz_Atk5C", 0.6, 0.0, 5.0, 0.01)
@@ -66,7 +83,7 @@ function NmlAtk5C_Update(actor, frame)
 	
 function Iz_Atk5C_Update(actor, frame)
 	if frame == 1 then
-		actor:SetVelocity(4.0, 0.0)
+		actor:SetVelocity(8.0, 0.0)
 		actor:SetVelocityMod(-0.35, 0.0)
 	elseif frame == 3 then
 		actor:SetVelocity(0.0, 0.0)

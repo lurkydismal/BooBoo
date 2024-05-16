@@ -55,7 +55,7 @@ namespace BooBoo.Battle
             } 
         }
 
-        public int frameActiveTime = 0;
+        public int frameActiveTime = -1;
         public int frameLength { get { return curFrame.frameLength; } }
 
         List<StateList.State> cancableStates = new List<StateList.State>();
@@ -115,7 +115,7 @@ namespace BooBoo.Battle
 
             if(frameActiveTime >= frameLength)
             {
-                frameActiveTime = 0;
+                frameActiveTime = -1;
                 curAnimFrame++;
                 CallLuaFunc(curState + "_Update", this, curAnimFrame);
                 if(curAnimFrame >= curAnim.frameCount)
@@ -145,6 +145,12 @@ namespace BooBoo.Battle
                 position.Y = 0.0f;
                 velocity.Y = 0.0f;
                 velocityMod.Y = 0.0f;
+                if(states.HasState(curState))
+                {
+                    StateList.State state = states.GetState(curState);
+                    if (state.LandToState)
+                        EnterState(state.LandState);
+                }
             }
 
             opponentDist = GetDistanceFrom(opponent);
@@ -153,7 +159,7 @@ namespace BooBoo.Battle
 
             if (MathF.Abs(position.X) > stage.stageWidth)
                 position.X = stage.stageWidth * MathF.Sign(position.X);
-            //Console.WriteLine(position + "\t" + velocity + "\t" + opponentDist);
+            Console.WriteLine(position + "\t" + velocity + "\t" + opponentDist);
             #endregion
 
             #region buffer update
@@ -312,6 +318,7 @@ namespace BooBoo.Battle
             curState = state;
             curAnimName = state;
             curAnimFrame = 0;
+            frameActiveTime = -1;
 
             cancableStates.Clear();
             if(states.HasState(state))
@@ -402,6 +409,11 @@ namespace BooBoo.Battle
             LuaFunction func = luaCode[function] as LuaFunction;
             if (func != null)
                 func.Call(args);
+        }
+
+        public int GetInputDir()
+        {
+            return inputBuffer[0].direction;
         }
 
         public void RemoveCancel(string state)
