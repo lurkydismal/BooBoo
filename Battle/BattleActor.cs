@@ -174,17 +174,31 @@ namespace BooBoo.Battle
                 Vector2 boxDist = ourPush.Value.GetDistanceFrom(position.XY(), theirPush.Value, actor.position.XY());
 
                 if (boxDist.X < 0 && boxDist.X < theirPush.Value.width)
-                    actor.position.X = position.X - theirPush.Value.width;
+                {
+                    if (!actor.TouchingWall() || !actor.TouchingDistanceWall(actor.GetDistanceFrom(this)))
+                        actor.position.X = position.X - theirPush.Value.width;
+                    else
+                        position.X = actor.position.X - theirPush.Value.width;
+                }
                 else if (boxDist.X > 0 && boxDist.X > ourPush.Value.width)
-                    actor.position.X = position.X + ourPush.Value.width;
+                {
+                    if(!actor.TouchingWall() || !actor.TouchingDistanceWall(actor.GetDistanceFrom(this)))
+                        actor.position.X = position.X + ourPush.Value.width;
+                    else
+                        position.X = actor.position.X + ourPush.Value.width;
+                }
             }
 
             opponentDist = GetDistanceFrom(opponent);
-            if (collisionFlags.HasFlag(CollisionFlags.DistanceWall) && MathF.Abs(opponentDist.X) > stage.maxPlayerDistance)
+            if (TouchingDistanceWall(opponentDist))
                 position.X = opponent.position.X + (stage.maxPlayerDistance * -MathF.Sign(opponentDist.X));
 
-            if (collisionFlags.HasFlag(CollisionFlags.StageWall) && MathF.Abs(position.X) > stage.stageWidth)
-                position.X = stage.stageWidth * MathF.Sign(position.X);
+            RectCollider? push = pushBox;
+            if (TouchingWall())
+                if (pushBox != null)
+                    position.X = (push.Value.x - push.Value.width / 2.0f + stage.stageWidth) * MathF.Sign(position.X);
+                else
+                    position.X = stage.stageWidth * MathF.Sign(position.X);
             //Console.WriteLine(position + "\t" + velocity + "\t" + opponentDist);
 
             #endregion
@@ -417,6 +431,20 @@ namespace BooBoo.Battle
         {
             velocityMod.X = x * oneSixteth;
             velocityMod.Y = y * oneSixteth;
+        }
+
+        public bool TouchingWall()
+        {
+            float wallTouchPos = position.X;
+            RectCollider? push = pushBox;
+            if (push != null)
+                wallTouchPos += push.Value.x * (int)dir - push.Value.width * (int)dir / 2.0f;
+            return collisionFlags.HasFlag(CollisionFlags.StageWall) && MathF.Abs(wallTouchPos) > stage.stageWidth;
+        }
+
+        public bool TouchingDistanceWall(Vector3 opponentDist)
+        {
+            return collisionFlags.HasFlag(CollisionFlags.DistanceWall) && MathF.Abs(opponentDist.X) > stage.maxPlayerDistance;
         }
 
         public void Delete()
