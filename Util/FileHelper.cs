@@ -7,13 +7,14 @@ namespace BooBoo.Util
 {
     internal static class FileHelper
     {
-        private static readonly string ProjectPath = "E:/Repos/BooBoo/Data/";
+        //dont wanna copy data folder a lot so lets get it from project directory. this is built asuming we're in {project}/bin/debug
+        private static readonly string ProjectPath = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName + "/Data/";
         private static string GetFullPath(string path)
         {
 #if DEBUG
             return ProjectPath + path;
 #else
-            return Directory.GetCurrentDirectory() + '/' + path;
+            return Environment.CurrentDirectory + '/' + path;
 #endif
         }
 
