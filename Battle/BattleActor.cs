@@ -48,12 +48,15 @@ namespace BooBoo.Battle
         public RectCollider? pushBox { 
             get
             {
+                if (curFrame == null)
+                    return null;
                 foreach (RectCollider rect in curFrame.colliders)
                     if (rect.colliderType == RectCollider.ColliderType.Push)
                         return rect;
                 return null;
             } 
         }
+        public CollisionFlags collisionFlags = CollisionFlags.DefaultSettings;
 
         public int frameActiveTime = -1;
         public int frameLength { get { return curFrame.frameLength; } }
@@ -140,7 +143,7 @@ namespace BooBoo.Battle
             #region physics update
             velocity += velocityMod;
             position += new Vector3(velocity.X * (int)dir, velocity.Y, velocity.Z);
-            if(position.Y < 0.0f)
+            if(collisionFlags.HasFlag(CollisionFlags.Floor) && position.Y < 0.0f)
             {
                 position.Y = 0.0f;
                 velocity.Y = 0.0f;
@@ -153,13 +156,37 @@ namespace BooBoo.Battle
                 }
             }
 
+            //pushbox collision
+            foreach (BattleActor actor in gameState.actors)
+            {
+                if(actor == this) continue;
+                if (actor.player == player)
+                { if (!collisionFlags.HasFlag(CollisionFlags.ActorsOnSameTeam)) continue; }
+                else if(!collisionFlags.HasFlag(CollisionFlags.ActorsOnDifferentTeams)) continue;
+
+                RectCollider? ourPush = pushBox; RectCollider? theirPush = actor.pushBox;
+                if (ourPush == null || theirPush == null)
+                    continue;
+
+                if (!ourPush.Value.Overlaps(position.XY(), theirPush.Value, actor.position.XY()))
+                    continue;
+
+                Vector2 boxDist = ourPush.Value.GetDistanceFrom(position.XY(), theirPush.Value, actor.position.XY());
+
+                if (boxDist.X < 0 && boxDist.X < theirPush.Value.width)
+                    actor.position.X = position.X - theirPush.Value.width;
+                else if (boxDist.X > 0 && boxDist.X > ourPush.Value.width)
+                    actor.position.X = position.X + ourPush.Value.width;
+            }
+
             opponentDist = GetDistanceFrom(opponent);
-            if (MathF.Abs(opponentDist.X) > stage.maxPlayerDistance)
+            if (collisionFlags.HasFlag(CollisionFlags.DistanceWall) && MathF.Abs(opponentDist.X) > stage.maxPlayerDistance)
                 position.X = opponent.position.X + (stage.maxPlayerDistance * -MathF.Sign(opponentDist.X));
 
-            if (MathF.Abs(position.X) > stage.stageWidth)
+            if (collisionFlags.HasFlag(CollisionFlags.StageWall) && MathF.Abs(position.X) > stage.stageWidth)
                 position.X = stage.stageWidth * MathF.Sign(position.X);
             //Console.WriteLine(position + "\t" + velocity + "\t" + opponentDist);
+
             #endregion
 
             #region buffer update
@@ -372,6 +399,7 @@ namespace BooBoo.Battle
             actor.position.X = position.X + offsetX;
             actor.position.Y = position.Y + offsetY;
             actor.position.Z = position.Z;
+            actor.dir = dir;
             children.Add(actor);
             actor.parent = this;
             actor.player = player;
@@ -413,7 +441,13 @@ namespace BooBoo.Battle
 
         public int GetInputDir()
         {
-            return inputBuffer[0].direction;
+            int rtrn = inputBuffer[0].direction;
+            if (dir == Direction.Right)
+                if (rtrn == 1 || rtrn == 4 || rtrn == 7)
+                    rtrn += 2;
+                else if (rtrn == 3 || rtrn == 6 || rtrn == 9)
+                    rtrn -= 2;
+            return rtrn;
         }
 
         public void RemoveCancel(string state)

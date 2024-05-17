@@ -99,4 +99,36 @@ namespace BooBoo.Battle
         ShadowAndReflection,
         Custom,
     }
+
+    [Flags]
+    public enum CollisionFlags
+    {
+        None = 0,
+
+        //Push box and position checks
+        StageWall = 0b_0000_0000_0000_0001, //Collide with wall at edge of stage
+        DistanceWall = 0b_0000_0000_0000_0010, //Collide with wall at max player distances
+        Floor = 0b_0000_0000_0000_0100, //Collide with the floor
+        ActorsOnDifferentTeams = 0b_0000_0000_0000_1000, //Collide with all actors that dont have the same player as this
+        ActorsOnSameTeam = 0b_0000_0000_0001_0000, //Collide with actors that have the same player as this
+
+        //Attack checks
+        Invincible = 0b_0000_0000_0010_0000, //Hit boxes cant detect hurt boxes
+        GrabInvincible = 0b_0000_0000_0100_0000, //Grab boxes cant detect push boxes
+        HitboxesCanHit = 0b_0000_0000_1000_0000, //Hit boxes are allowed to detect other boxes
+        AttackMembersOfSameTeam = 0b_0000_0001_0000_0000, //This actor can attack actors that have the same player as this
+
+        //Misc box checks
+        MiscCountsAsHurt = 0b_0000_0010_0000_0000,
+        MiscCountAsHit = 0b_0000_0100_0000_0000,
+        MiscCountsAsObjLink = 0b_0000_1000_0000_0000,
+        MiscCallsFuncOnOverlap = 0b_0001_0000_0000_0000,
+
+        
+
+        //Macros
+        DefaultSettings = StageWall | Floor | ActorsOnDifferentTeams | HitboxesCanHit,
+        DefaultPlayerSettings = StageWall | Floor | DistanceWall | ActorsOnDifferentTeams | HitboxesCanHit,
+        CheckerObject = Invincible | GrabInvincible | MiscCallsFuncOnOverlap,
+    }
 }
