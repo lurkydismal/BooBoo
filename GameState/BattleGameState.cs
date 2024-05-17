@@ -26,8 +26,21 @@ namespace BooBoo.GameState
         public Shader spriteShader { get; private set; }
         public int sprShaderPalLoc { get; private set; }
 
-        RenderTexture2D bgTex, uiTex1, charTex, uiTex2, superBg;
+        RenderTexture2D bgTex, uiTex1, charTex, charBoxTex, uiTex2, superBg;
         Rectangle renderTexRect;
+
+        public bool drawBoxes = true;
+        static readonly Color[] colliderTypeColors = {
+            new Color(255, 255, 60, 180),
+            new Color(90, 255, 60, 180),
+            new Color(255, 60, 60, 180),
+            new Color(60, 75, 255, 180),
+            new Color(175, 60, 255, 180),
+            new Color(175, 100, 255, 180),
+            new Color(175, 140, 255, 180),
+            new Color(145, 20, 20, 180),
+            new Color(79, 255, 226, 180)
+        };
 
         public override void Init()
         {
@@ -37,6 +50,7 @@ namespace BooBoo.GameState
 
             bgTex = Raylib.LoadRenderTexture(1280, 720);
             charTex = Raylib.LoadRenderTexture(1280, 720);
+            charBoxTex = Raylib.LoadRenderTexture(1280, 720);
             uiTex1 = Raylib.LoadRenderTexture(1280, 720);
             renderTexRect = new Rectangle(0, 0, 1280, -720);
             stage = new BattleStage("Debug");
@@ -75,9 +89,11 @@ namespace BooBoo.GameState
             {
                 actors[0].SetOpponent(actors[1]);
                 actors[0].position.X = -3.0f;
+                actors[0].collisionFlags = CollisionFlags.DefaultPlayerSettings;
                 actors[1].SetOpponent(actors[0]);
                 actors[1].position.X = 3.0f;
                 actors[1].renderOffset = -0.001f;
+                actors[0].collisionFlags = CollisionFlags.DefaultPlayerSettings;
                 actors[1].dir = BattleActor.Direction.Right;
                 ui = new BattleUI(actors[0], actors[1], FileHelper.LoadPrmAn("UI/Battle/BattleUI.prman"));
                 new BattleCamera() { player1 = actors[0], player2 = actors[1] };
@@ -111,10 +127,28 @@ namespace BooBoo.GameState
             Raylib.BeginMode3D(BattleCamera.activeCamera);
             foreach (BattleActor actor in actorsToDraw)
                 actor.Draw();
-            actorsToDraw.Clear();
             Raylib.EndMode3D();
             Raylib.EndTextureMode();
 
+            //Draw Boxes
+            if (drawBoxes)
+            {
+                Raylib.BeginTextureMode(charBoxTex);
+                Raylib.ClearBackground(new Color(0, 0, 0, 0));
+                Raylib.BeginMode3D(BattleCamera.activeCamera);
+                foreach (BattleActor actor in actorsToDraw)
+                {
+                    if (actor.curFrame == null)
+                        continue;
+                    foreach (RectCollider rect in actor.curFrame.colliders)
+                        Raylib.DrawCube(actor.position + rect.GetCenter().ToVector3(actor.renderOffset + 0.01f), rect.width,
+                            rect.height, 0.0f, colliderTypeColors[(int)rect.colliderType]);
+                }
+                Raylib.EndMode3D();
+                Raylib.EndTextureMode();
+            }
+            actorsToDraw.Clear();
+             
             //Draw bg 1
             Raylib.BeginTextureMode(bgTex);
             stage.Draw();
@@ -131,6 +165,8 @@ namespace BooBoo.GameState
             Raylib.DrawTextureRec(bgTex.Texture, renderTexRect, Vector2.Zero, Color.White);
             Raylib.DrawTextureRec(uiTex1.Texture, renderTexRect, Vector2.Zero, Color.White);
             Raylib.DrawTextureRec(charTex.Texture, renderTexRect, Vector2.Zero, Color.White);
+            if (drawBoxes)
+                Raylib.DrawTextureRec(charBoxTex.Texture, renderTexRect, Vector2.Zero, Color.White);
             Window.FinalizeDrawing();
         }
 
@@ -140,6 +176,8 @@ namespace BooBoo.GameState
 
             Raylib.UnloadRenderTexture(bgTex);
             Raylib.UnloadRenderTexture(charTex);
+            Raylib.UnloadRenderTexture(charBoxTex);
+            Raylib.UnloadRenderTexture(uiTex1);
         }
 
         struct CharLoadDat

@@ -44,5 +44,20 @@ namespace BooBoo.Util
             foreach (PrmAn.Texture tex in an.textures.Values)
                 Rlgl.UnloadTexture(tex.glTexId);
         }
+
+        public static Vector2 XY(this Vector3 vec)
+        {
+            return new Vector2(vec.X, vec.Y);
+        }
+
+        public static Vector3 ToVector3(this Vector2 vec)
+        {
+            return new Vector3(vec.X, vec.Y, 0.0f);
+        }
+
+        public static Vector3 ToVector3(this Vector2 vec, float z)
+        {
+            return new Vector3(vec.X, vec.Y, z);
+        }
     }
 }
