@@ -141,8 +141,8 @@ namespace BooBoo.GameState
                     if (actor.curFrame == null)
                         continue;
                     foreach (RectCollider rect in actor.curFrame.colliders)
-                        Raylib.DrawCube(actor.position + rect.GetCenter().ToVector3(actor.renderOffset + 0.01f), rect.width,
-                            rect.height, 0.0f, colliderTypeColors[(int)rect.colliderType]);
+                        Raylib.DrawCube(actor.position + new Vector3(rect.x * (int)actor.dir + rect.width / 2.0f * (int)actor.dir, rect.y + rect.height / 2.0f, 0.0f), 
+                            rect.width, rect.height, 0.0f, colliderTypeColors[(int)rect.colliderType]);
                 }
                 Raylib.EndMode3D();
                 Raylib.EndTextureMode();
