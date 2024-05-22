@@ -24,7 +24,9 @@ namespace BooBoo.Util
             if (!File.Exists(path))
                 return null;
             BinaryReader file = new BinaryReader(File.OpenRead(path));
-            return new DPArc(file);
+            DPArc rtrn = new DPArc(file);
+            file.Close();
+            return rtrn;
         }
 
         public static PrmAn LoadPrmAn(string path)
