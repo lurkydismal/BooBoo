@@ -19,6 +19,7 @@ namespace BooBoo.Battle
         public Vector3 scale = Vector3.One;
         public float renderOffset = 0.001f;
         public Direction dir = Direction.Left;
+        public int posSign { get { return MathF.Sign(position.X); } }
 
         public int curHealth = 1;
         public int maxHealth = 1;
@@ -57,6 +58,7 @@ namespace BooBoo.Battle
             } 
         }
         public CollisionFlags collisionFlags = CollisionFlags.DefaultSettings;
+        public float wallPushboxWidth = 0.5f; //This will be used to check distance from wall instead of pushbox
 
         public int frameActiveTime = -1;
         public int frameLength { get { return curFrame.frameLength; } }
@@ -175,30 +177,26 @@ namespace BooBoo.Battle
 
                 if (boxDist.X < 0 && boxDist.X < theirPush.Value.width)
                 {
-                    if (!actor.TouchingWall() || !actor.TouchingDistanceWall(actor.GetDistanceFrom(this)))
+                    if (!actor.TouchingWall() || !actor.TouchingDistanceWall(actor.GetDistanceFrom(player)))
                         actor.position.X = position.X - theirPush.Value.width;
                     else
-                        position.X = actor.position.X - theirPush.Value.width;
+                        position.X = actor.position.X + ourPush.Value.width;
                 }
                 else if (boxDist.X > 0 && boxDist.X > ourPush.Value.width)
                 {
-                    if(!actor.TouchingWall() || !actor.TouchingDistanceWall(actor.GetDistanceFrom(this)))
+                    if(!actor.TouchingWall() || !actor.TouchingDistanceWall(actor.GetDistanceFrom(player)))
                         actor.position.X = position.X + ourPush.Value.width;
                     else
-                        position.X = actor.position.X + ourPush.Value.width;
+                        position.X = actor.position.X - theirPush.Value.width;
                 }
             }
 
             opponentDist = GetDistanceFrom(opponent);
             if (TouchingDistanceWall(opponentDist))
-                position.X = opponent.position.X + (stage.maxPlayerDistance * -MathF.Sign(opponentDist.X));
+                position.X = opponent.position.X + (stage.maxPlayerDistance * -MathF.Sign(opponentDist.X)) + wallPushboxWidth * MathF.Sign(position.X);
 
-            RectCollider? push = pushBox;
             if (TouchingWall())
-                if (pushBox != null)
-                    position.X = (push.Value.x - push.Value.width / 2.0f + stage.stageWidth) * MathF.Sign(position.X);
-                else
-                    position.X = stage.stageWidth * MathF.Sign(position.X);
+                position.X = (stage.stageWidth - wallPushboxWidth) * MathF.Sign(position.X);
             //Console.WriteLine(position + "\t" + velocity + "\t" + opponentDist);
 
             #endregion
@@ -435,16 +433,12 @@ namespace BooBoo.Battle
 
         public bool TouchingWall()
         {
-            float wallTouchPos = position.X;
-            RectCollider? push = pushBox;
-            if (push != null)
-                wallTouchPos += push.Value.x * (int)dir - push.Value.width * (int)dir / 2.0f;
-            return collisionFlags.HasFlag(CollisionFlags.StageWall) && MathF.Abs(wallTouchPos) > stage.stageWidth;
+            return collisionFlags.HasFlag(CollisionFlags.StageWall) && MathF.Abs(position.X + wallPushboxWidth * MathF.Sign(position.X)) > stage.stageWidth;
         }
 
         public bool TouchingDistanceWall(Vector3 opponentDist)
         {
-            return collisionFlags.HasFlag(CollisionFlags.DistanceWall) && MathF.Abs(opponentDist.X) > stage.maxPlayerDistance;
+            return collisionFlags.HasFlag(CollisionFlags.DistanceWall) && MathF.Abs(opponentDist.X + wallPushboxWidth * MathF.Sign(position.X)) > stage.maxPlayerDistance;
         }
 
         public void Delete()
@@ -491,6 +485,11 @@ namespace BooBoo.Battle
         public void Flip()
         {
             dir = (Direction)((int)dir * -1);
+        }
+
+        public void FaceActor(BattleActor actor)
+        {
+            dir = (Direction)MathF.Sign(GetDistanceFrom(actor).X);
         }
 
         public void SetOpponent(BattleActor opponent)
