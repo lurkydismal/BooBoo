@@ -15,10 +15,12 @@ function SetPersonaMove(state, xOffset, yOffset, xMaxDist, yMaxDist)
 		iz.position.Y = yu.position.Y + yOffset
 		end
 	iz:EnterState(state)
+	izActive = true
 	end
 
 function Iz_Init(actor)
 	actor.curPalNum = 1
+	actor:EnterState("Iz_Wait")
 	end
 
 function CmnStand_Loop(actor)
@@ -95,5 +97,6 @@ function Iz_Atk5C_Update(actor, frame)
 
 function Iz_Atk5C_End(actor)
 	actor.animBlending = false
-	actor:EnterState("Iz_Init", false)
+	actor:EnterState("Iz_Wait", false)
+	izActive = false
 	end
