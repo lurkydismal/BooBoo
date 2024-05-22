@@ -147,8 +147,8 @@ namespace BooBoo.Battle
         CmnHurtCrouchMedium, //X frames + 7
         CmnHurtCrouchHeavy, //X frames + 10
 
-        CmnHurtStagger, //This guy is special where it loops until you either go into CmnHurtStaggerEnd or wake up
-        CmnHurtStaggerEnd, //Little inbetween anim. Goes to CmnHurtTripLand when it ends
+        CmnHurtStagger, //This guy is special where it loops until you either go into CmnHurtCrumple or wake up
+        CmnHurtCrumple, //Little inbetween anim. Goes to CmnHurtTripLand when it ends
 
         //These are the air states. No special properties
         CmnHurtLaunch, //When going up
