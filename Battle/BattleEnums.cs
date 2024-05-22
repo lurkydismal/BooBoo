@@ -131,4 +131,49 @@ namespace BooBoo.Battle
         DefaultPlayerSettings = StageWall | Floor | DistanceWall | ActorsOnDifferentTeams | HitboxesCanHit,
         CheckerObject = Invincible | GrabInvincible | MiscCallsFuncOnOverlap,
     }
+
+    public enum HitstunStates
+    {
+        //These are hitstun states on the ground. They are X frames of hitstun plus Y frames in state
+        CmnHurtStandWeak, //X frames + 4
+        CmnHurtStandMedium, //X frames + 7
+        CmnHurtStandHeavy, //X frames + 10
+
+        CmnHurtGutWeak, //X frames + 4
+        CmnHurtGutMedium, //X frames + 7
+        CmnHurtGutHeavy, //X frames + 10
+
+        CmnHurtCrouchWeak, //X frames + 4
+        CmnHurtCrouchMedium, //X frames + 7
+        CmnHurtCrouchHeavy, //X frames + 10
+
+        CmnHurtStagger, //This guy is special where it loops until you either go into CmnHurtStaggerEnd or wake up
+        CmnHurtStaggerEnd, //Little inbetween anim. Goes to CmnHurtTripLand when it ends
+
+        //These are the air states. No special properties
+        CmnHurtLaunch, //When going up
+        CmnHurtLaunchToFall, //An inbetween state for anim reasons. Acts the sam as fall
+        CmnHurtFall, //Going back down
+        CmnHurtTrip, //Used for falling forward reasons such as trip moves
+
+        CmnHurtBlowback, //Used when its a really strong hit in one direction, usually leading in a wall stick/bounce
+        CmnHurtWallStick, //Used for when on the wall
+
+        CmnHurtSpinySpinSpin, //Hard to explain. Just spin around then goes into CmnHurtGroundSlide. Also points to whoever gets the reference
+        CmnHurtDiagonalSpin, //Funny little diagonal spin. Basically acts as another anim for launch for variety
+
+        //These are OTG states. All of them linger on the final frame until hitstun is done
+        CmnHurtFallLand, //Landing from CmnHurtFall
+        CmnHurtTripLand, //Landing from CmnHurtTrip
+
+        CmnHurtGroundSlide, //When landing from spiny spin spin. Will go into CmnHurtGroundSlideEnd once momentum ends
+        CmnHurtGroundSlideEnd,
+        
+        //Wake up states
+        CmnHurtWakeUpAir, //When waking up in the air.
+        CmnHurtWakeUpGround, //When waking up on the ground.
+        CmnHurtWakeUpLand, //When landing from wake up states.
+
+        CmnHurtWakeUpLazy, //When you wait to do a slow wake up.
+    }
 }
