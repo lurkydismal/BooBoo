@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BooBoo", "BooBoo.csproj", "{7121DFF1-4BEB-4CC0-85AE-BA73092D5A71}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BooBoo", "BooBoo.csproj", "{7121DFF1-4BEB-4CC0-85AE-BA73092D5A71}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlakieLibSharp", "..\BlakieLibSharp\BlakieLibSharp.csproj", "{02B44F13-672F-46A0-A51A-BDD146879229}"
 EndProject
@@ -17,8 +17,8 @@ Global
 		{7121DFF1-4BEB-4CC0-85AE-BA73092D5A71}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7121DFF1-4BEB-4CC0-85AE-BA73092D5A71}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7121DFF1-4BEB-4CC0-85AE-BA73092D5A71}.Release|Any CPU.Build.0 = Release|Any CPU
-		{02B44F13-672F-46A0-A51A-BDD146879229}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{02B44F13-672F-46A0-A51A-BDD146879229}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02B44F13-672F-46A0-A51A-BDD146879229}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{02B44F13-672F-46A0-A51A-BDD146879229}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{02B44F13-672F-46A0-A51A-BDD146879229}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02B44F13-672F-46A0-A51A-BDD146879229}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
