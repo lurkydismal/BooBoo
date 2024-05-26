@@ -134,21 +134,23 @@ namespace BooBoo.Battle
 
     public enum HitstunStates
     {
+        None,
+
         //These are hitstun states on the ground. They are X frames of hitstun plus Y frames in state
-        CmnHurtStandWeak, //X frames + 4
-        CmnHurtStandMedium, //X frames + 7
-        CmnHurtStandHeavy, //X frames + 10
+        CmnHurtStandWeak, //X frames + 6
+        CmnHurtStandMedium, //X frames + 9
+        CmnHurtStandHeavy, //X frames + 15
 
-        CmnHurtGutWeak, //X frames + 4
-        CmnHurtGutMedium, //X frames + 7
-        CmnHurtGutHeavy, //X frames + 10
+        CmnHurtGutWeak, //X frames + 6
+        CmnHurtGutMedium, //X frames + 9
+        CmnHurtGutHeavy, //X frames + 15
 
-        CmnHurtCrouchWeak, //X frames + 4
-        CmnHurtCrouchMedium, //X frames + 7
-        CmnHurtCrouchHeavy, //X frames + 10
+        CmnHurtCrouchWeak, //X frames + 6
+        CmnHurtCrouchMedium, //X frames + 9
+        CmnHurtCrouchHeavy, //X frames + 15
 
         CmnHurtStagger, //This guy is special where it loops until you either go into CmnHurtCrumple or wake up
-        CmnHurtCrumple, //Little inbetween anim. Goes to CmnHurtTripLand when it ends
+        CmnHurtCrumple, //Little inbetween anim. Lingers on final frame until wake up. Entire anim should be 30 frames
 
         //These are the air states. No special properties
         CmnHurtLaunch, //When going up
@@ -159,21 +161,21 @@ namespace BooBoo.Battle
         CmnHurtBlowback, //Used when its a really strong hit in one direction, usually leading in a wall stick/bounce
         CmnHurtWallStick, //Used for when on the wall
 
-        CmnHurtSpinySpinSpin, //Hard to explain. Just spin around then goes into CmnHurtGroundSlide. Also points to whoever gets the reference
+        //CmnHurtSpinySpinSpin, //Hard to explain. Just spin around then goes into CmnHurtGroundSlide. Also points to whoever gets the reference
         CmnHurtDiagonalSpin, //Funny little diagonal spin. Basically acts as another anim for launch for variety
 
         //These are OTG states. All of them linger on the final frame until hitstun is done
-        CmnHurtFallLand, //Landing from CmnHurtFall
-        CmnHurtTripLand, //Landing from CmnHurtTrip
+        CmnHurtLandFall, //Landing from CmnHurtFall. Should be 25 frames
+        CmnHurtLandTrip, //Landing from CmnHurtTrip. Should be 20 frames
 
-        CmnHurtGroundSlide, //When landing from spiny spin spin. Will go into CmnHurtGroundSlideEnd once momentum ends
-        CmnHurtGroundSlideEnd,
+        //CmnHurtGroundSlide, //When landing from spiny spin spin. Will go into CmnHurtGroundSlideEnd once momentum ends
+        //CmnHurtGroundSlideEnd,
         
         //Wake up states
         CmnHurtWakeUpAir, //When waking up in the air.
         CmnHurtWakeUpGround, //When waking up on the ground.
         CmnHurtWakeUpLand, //When landing from wake up states.
 
-        CmnHurtWakeUpLazy, //When you wait to do a slow wake up.
+        CmnHurtWakeUpLazy, //When you wait to do a slow wake up. Should be 24 frames.
     }
 }
