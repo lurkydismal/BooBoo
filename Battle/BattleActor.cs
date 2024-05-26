@@ -45,7 +45,31 @@ namespace BooBoo.Battle
         public int curAnimFrame = 0;
         public SprAn.SprAnFrame curFrame { get { return sprAn.GetFrame(curAnimName, curAnimFrame); } }
 
-        //the pushbox used for general collision with other players and the wall. will get the first box found as push, or return null if there are none
+        //Hurt values
+        public int hitstopTime = 0;
+        public int hitstunTime = 0; //if on ground this is time in hitstun state + state anim time, in air this is time before you can wake up.
+        public int HKDTime = 0; //time youre stuck on the ground before you can wake up
+        public int HKDBeginInvulTime = -1; //once this reaches zero you get set to invincible until you wake up
+        public HitstunStates hitstunState = HitstunStates.None;
+        public Vector2 hitDirection = Vector2.Zero;
+        public Vector2 hitDirMod = Vector2.Zero;
+        public Vector2 hitDirMin = Vector2.Zero; //once direction reaches this itll stop applying mod on whatever axis
+
+        //Hit values
+        public int damage = 0;
+        public int hitstopOnHit = 0;
+        public int hitstunOnHit = 0;
+        public int HKDOnHit = 0;
+        public int HKDInvulTimerOnHit = -1;
+        public Vector2 dirOnHit = Vector2.Zero;
+        public Vector2 dirModOnHit = Vector2.Zero;
+        public Vector2 dirMinOnHit = Vector2.Zero; //once direction reaches this itll stop applying mod on whatever axis
+        public HitstunStates hitStateStanding = HitstunStates.CmnHurtStandWeak;
+        public HitstunStates hitStateCrouching = HitstunStates.CmnHurtCrouchWeak;
+        public HitstunStates hitStateAerial = HitstunStates.CmnHurtLaunch;
+
+
+        //the pushbox used for general collision with other players. will get the first box found as push, or return null if there are none
         public RectCollider? pushBox { 
             get
             {
@@ -110,6 +134,10 @@ namespace BooBoo.Battle
         {
             if (curFrame == null)
                 return;
+
+            hitstopTime = hitstopTime > 0 ? hitstopTime-- : 0;
+            if (hitstopTime > 0)
+                goto BufferUpdate;
 
             frameActiveTime++;
             CallLuaFunc(curState + "_Tick", this);
@@ -202,6 +230,7 @@ namespace BooBoo.Battle
             #endregion
 
             #region buffer update
+            BufferUpdate:
             if (isPlayer)
             {
                 int inpDir;
@@ -238,9 +267,12 @@ namespace BooBoo.Battle
                     if (bufItem.timeInBuffer >= 60)
                         inputBuffer.RemoveAt(i);
                 }
+            }
             #endregion
 
             #region input check
+            if(isPlayer && hitstopTime <= 0)
+            {
                 List<StateList.State> cancels = new List<StateList.State>();
                 foreach (StateList.State state in cancableStates)
                 {
