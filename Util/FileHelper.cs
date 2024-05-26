@@ -23,9 +23,36 @@ namespace BooBoo.Util
             path = GetFullPath(path);
             if (!File.Exists(path))
                 return null;
-            BinaryReader file = new BinaryReader(File.OpenRead(path));
-            DPArc rtrn = new DPArc(file);
-            file.Close();
+            DPArc rtrn;
+            using (BinaryReader file = new BinaryReader(File.OpenRead(path)))
+                rtrn = new DPArc(file);
+            return rtrn;
+        }
+
+        public static ArchiveFile LoadFileFromArchive(string fullPath)
+        {
+            int dparcIndex = fullPath.IndexOf(".dparc");
+            if (dparcIndex <= 0)
+                return null;
+            string archivePath = fullPath.Substring(0, dparcIndex + 7);
+            string fileName = fullPath.Substring(dparcIndex + 6);
+            return LoadFileFromArchive(archivePath, fileName);
+        }
+
+        public static ArchiveFile LoadFileFromArchive(string archivePath, string fileName)
+        {
+            archivePath = GetFullPath(archivePath);
+            if (!File.Exists(archivePath))
+                return null;
+            ArchiveFile rtrn;
+            using (BinaryReader file = new BinaryReader(File.OpenRead(archivePath)))
+                using (DPArc arc = new DPArc(file))
+                {
+                    if (arc.FileExists(fileName))
+                        rtrn = arc.GetFile(fileName);
+                    else
+                        rtrn = null;
+                }
             return rtrn;
         }
 
@@ -34,9 +61,9 @@ namespace BooBoo.Util
             path = GetFullPath(path);
             if (!File.Exists(path))
                 return null;
-            BinaryReader file = new BinaryReader(File.OpenRead(path));
-            PrmAn rtrn = new PrmAn(file);
-            file.Close();
+            PrmAn rtrn;
+            using (BinaryReader file = new BinaryReader(File.OpenRead(path)))
+                rtrn = new PrmAn(file);
             rtrn.LoadTexturesToGPU();
             return rtrn;
         }
