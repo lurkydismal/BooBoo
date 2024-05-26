@@ -49,7 +49,7 @@ namespace BooBoo.Battle
             //Draw stage mesh stuff
 
             if (stageDef.DrawGrid)
-                Raylib.DrawGrid(50, 1.0f);
+                Raylib.DrawGrid((int)stageDef.StageWidth * 2, 1.0f);
 
             Raylib.EndMode3D();
         }
