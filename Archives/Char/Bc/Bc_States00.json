@@ -269,5 +269,13 @@
 		}
 	],
 	"SpecialStates": [],
-	"SuperStates": []
+	"SuperStates": [],
+	"HitstunLoopData": {
+		"StaggerLoopPos": 0,
+		"LaunchLoopPos": 1,
+		"FallLoopPos": 0,
+		"TripLoopPos": 3,
+		"BlowbackLoopPos": 1,
+		"DiagonalSpinLoopPos":  0
+	}
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
@@ -15,10 +14,12 @@ namespace BooBoo.Battle
         public State[] SpecialStates;
         [JsonProperty("SuperStates")]
         public State[] SuperStates;
+        [JsonProperty("HitstunLoopData")]
+        public HitstunLoopDef HitstunLoopData;
 
         public Dictionary<string, State> stateMap { get; private set; }
 
-        public List<State> AllStates { get { return stateMap.Values.ToList<State>(); } }
+        public List<State> AllStates { get { return stateMap.Values.ToList(); } }
 
         public void UpdateStateMap()
         {
@@ -94,6 +95,22 @@ namespace BooBoo.Battle
             [JsonProperty("TurnState")]
             public string TurnState;
             public StateType stateType;
+        }
+
+        public struct HitstunLoopDef
+        {
+            [JsonProperty("StaggerLoopPos")]
+            public int StaggerLoopPos;
+            [JsonProperty("LaunchLoopPos")]
+            public int LaunchLoopPos;
+            [JsonProperty("FallLoopPos")]
+            public int FallLoopPos;
+            [JsonProperty("TripLoopPos")]
+            public int TripLoopPos;
+            [JsonProperty("BlowbackLoopPos")]
+            public int BlowbackLoopPos;
+            [JsonProperty("DiagonalSpinLoopPos")]
+            public int DiagonalSpinLoopPos;
         }
     }
 }
