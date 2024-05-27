@@ -73,6 +73,8 @@
 		"FallLoopPos": 0,
 		"TripLoopPos": 3,
 		"BlowbackLoopPos": 1,
-		"DiagonalSpinLoopPos": 0
+		"DiagonalSpinLoopPos": 0,
+		"WakeUpAirLoopPos": 6,
+		"WakeUpGroundLoopPos": 6
 	}
 }

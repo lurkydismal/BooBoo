@@ -77,6 +77,10 @@ function CmnLand_Init(actor)
 	actor:SetVelocityMod(0.0, 0.0)
 	end
 
+function NmlAtk5A1st_Init(actor)
+	actor:AttackMacroWeak();
+	end
+
 function NmlAtk5C_Update(actor, frame)
 	if frame == 1 then
 		SetPersonaMove("Iz_Atk5C", 0.6, 0.0, 5.0, 0.01)

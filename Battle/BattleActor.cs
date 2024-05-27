@@ -15,6 +15,7 @@ namespace BooBoo.Battle
         public Vector3 position = Vector3.Zero;
         public Vector3 velocity = Vector3.Zero;
         public Vector3 velocityMod = Vector3.Zero;
+        public Vector3 velocityMin = Vector3.Zero; //will stop applying mod on vel if it reaches this threshold
         public Vector3 rotation = Vector3.Zero;
         public Vector3 scale = Vector3.One;
         public float renderOffset = 0.001f;
@@ -40,6 +41,7 @@ namespace BooBoo.Battle
         public StateList states { get; private set; }
         public string curState { get; private set; } = "CmnStand";
         public string curAnimName { get; private set; } = "CmnStand";
+        public StatePosition curStatePos { get; private set; } = StatePosition.Standing;
         public bool animBlending = false;
         public SprAn.SprAnState curAnim {  get { return sprAn.GetState(curAnimName); } }
         public int curAnimFrame = 0;
@@ -50,10 +52,8 @@ namespace BooBoo.Battle
         public int hitstunTime = 0; //if on ground this is time in hitstun state + state anim time, in air this is time before you can wake up.
         public int HKDTime = 0; //time youre stuck on the ground before you can wake up
         public int HKDBeginInvulTime = -1; //once this reaches zero you get set to invincible until you wake up
+        public bool willCrumple = false; //if true it will go into crumple after stagger
         public HitstunStates hitstunState = HitstunStates.None;
-        public Vector2 hitDirection = Vector2.Zero;
-        public Vector2 hitDirMod = Vector2.Zero;
-        public Vector2 hitDirMin = Vector2.Zero; //once direction reaches this itll stop applying mod on whatever axis
 
         //Hit values
         public int damage = 0;
@@ -61,13 +61,25 @@ namespace BooBoo.Battle
         public int hitstunOnHit = 0;
         public int HKDOnHit = 0;
         public int HKDInvulTimerOnHit = -1;
-        public Vector2 dirOnHit = Vector2.Zero;
-        public Vector2 dirModOnHit = Vector2.Zero;
-        public Vector2 dirMinOnHit = Vector2.Zero; //once direction reaches this itll stop applying mod on whatever axis
+        public bool crumpleOnHit = false;
+        public Vector2 dirOnHitGround = Vector2.Zero;
+        public Vector2 dirOnHitAir = Vector2.Zero;
+        public Vector2 dirModOnHitGround = Vector2.Zero;
+        public Vector2 dirModOnHitAir = Vector2.Zero;
+        public Vector2 dirMinOnHitGround = Vector2.Zero; 
+        public Vector2 dirMinOnHitAir = Vector2.Zero; 
         public HitstunStates hitStateStanding = HitstunStates.CmnHurtStandWeak;
         public HitstunStates hitStateCrouching = HitstunStates.CmnHurtCrouchWeak;
         public HitstunStates hitStateAerial = HitstunStates.CmnHurtLaunch;
+        public AttackHitAttribute attackAttribute = AttackHitAttribute.Body;
 
+        public List<BattleActor> actorsWillHit = new List<BattleActor>(); //attacker will get a list of all actors it will hit
+        public bool willBeHit = false; //if an actor is going to be hit this will be set to true
+        //very next frame before any updates itll check hits, if any actor in actorswillbehit have will be hit set to true then hit will be
+        //confirmed and will do hit code as needed
+
+        public List<BattleActor> actorsHit = new List<BattleActor>(); //this list shows what actors youve hit. we have this so that if an attack only
+        //hits once but has multiple frames with hitboxes it wont hit an actor multiple times.
 
         //the pushbox used for general collision with other players. will get the first box found as push, or return null if there are none
         public RectCollider? pushBox { 
@@ -81,12 +93,24 @@ namespace BooBoo.Battle
                 return null;
             } 
         }
+        public RectCollider[] colliders
+        {
+            get
+            {
+                if(curFrame == null)
+                    return new RectCollider[0];
+                return curFrame.colliders;
+            }
+        }
         public CollisionFlags collisionFlags = CollisionFlags.DefaultSettings;
         public float wallPushboxWidth = 0.5f; //This will be used to check distance from wall instead of pushbox
 
         public int frameActiveTime = -1;
         public int frameLength { get { return curFrame.frameLength; } }
 
+        List<string> hitCancels = new List<string>();
+        List<string> blockCancels = new List<string>();
+        List<string> hitOrBlockCancles = new List<string>();
         List<StateList.State> cancableStates = new List<StateList.State>();
         List<BufferItem> inputBuffer = new List<BufferItem>() { new BufferItem() };
 
@@ -133,52 +157,307 @@ namespace BooBoo.Battle
         public void Update()
         {
             if (curFrame == null)
+            {
+                actorsWillHit.Clear();
                 return;
+            }
 
-            hitstopTime = hitstopTime > 0 ? hitstopTime-- : 0;
+            //detect actors will hit first
+            foreach(BattleActor actor in actorsWillHit)
+                if(actor.willBeHit)
+                {
+                    //hurt actor code
+                    actor.curHealth -= damage;
+                    actor.hitstopTime = hitstopOnHit;
+                    actor.hitstunTime = hitstopOnHit;
+                    actor.HKDTime = HKDOnHit;
+                    actor.HKDBeginInvulTime = HKDInvulTimerOnHit;
+                    if (actor.curStatePos == StatePosition.Aerial)
+                    {
+                        actor.velocity = dirOnHitAir.ToVector3();
+                        actor.velocityMod = dirModOnHitAir.ToVector3();
+                        actor.velocityMin = dirMinOnHitAir.ToVector3();
+                    }
+                    else
+                    {
+                        actor.velocity = dirOnHitGround.ToVector3();
+                        actor.velocityMod = dirModOnHitGround.ToVector3();
+                        actor.velocityMin = dirMinOnHitGround.ToVector3();
+                    }
+                    actor.willCrumple = crumpleOnHit;
+                    switch(actor.curStatePos)
+                    {
+                        case StatePosition.Standing:
+                            actor.hitstunState = hitStateStanding;
+                            actor.EnterState(Enum.GetName(typeof(HitstunStates), hitStateStanding));
+                            break;
+                        case StatePosition.Crouching:
+                            actor.hitstunState = hitStateCrouching;
+                            actor.EnterState(Enum.GetName(typeof(HitstunStates), hitStateCrouching));
+                            break;
+                        case StatePosition.Aerial:
+                            actor.hitstunState = hitStateAerial;
+                            actor.EnterState(Enum.GetName(typeof(HitstunStates), hitStateAerial));
+                            break;
+                    }
+
+                    actor.willBeHit = false;
+
+                    //hit code
+                    hitstopTime = hitstopOnHit;
+                    actorsHit.Add(actor);
+                    CallLuaFunc(curState + "_Hit", this, actor);
+                }
+            actorsWillHit.Clear();
+
+            hitstopTime = hitstopTime > 0 ? hitstopTime - 1 : 0;
             if (hitstopTime > 0)
                 goto BufferUpdate;
 
-            frameActiveTime++;
-            CallLuaFunc(curState + "_Tick", this);
             Vector3 opponentDist = GetDistanceFrom(opponent);
-            if (states.HasState(curState) && states[curState].StateCanTurn)
-                if (MathF.Sign(opponentDist.X) == -(int)dir)
-                    EnterState(states[curState].TurnState);
-
-            if(frameActiveTime >= frameLength)
+            switch (hitstunState) //this looks ugly but it works
             {
-                frameActiveTime = -1;
-                curAnimFrame++;
-                CallLuaFunc(curState + "_Update", this, curAnimFrame);
-                if(curAnimFrame >= curAnim.frameCount)
-                {
-                    //Console.WriteLine("Looping");
-                    if (states.HasState(curState))
+                default:
+                case HitstunStates.None:
+                    frameActiveTime++;
+                    CallLuaFunc(curState + "_Tick", this);
+                    if (states.HasState(curState) && states[curState].StateCanTurn)
+                        if (MathF.Sign(opponentDist.X) == -(int)dir)
+                            EnterState(states[curState].TurnState);
+
+                    if (frameActiveTime >= frameLength)
                     {
-                        StateList.State state = states.GetState(curState);
-                        if (state.Looping)
+                        frameActiveTime = -1;
+                        curAnimFrame++;
+                        CallLuaFunc(curState + "_Update", this, curAnimFrame);
+                        if (curAnimFrame >= curAnim.frameCount)
                         {
-                            curAnimFrame = state.LoopPos;
-                            CallLuaFunc(curState + "_Loop", this);
+                            //Console.WriteLine("Looping");
+                            if (states.HasState(curState))
+                            {
+                                StateList.State state = states.GetState(curState);
+                                if (state.Looping)
+                                {
+                                    curAnimFrame = state.LoopPos;
+                                    CallLuaFunc(curState + "_Loop", this);
+                                }
+                                else
+                                    EnterState(state.NextState);
+                            }
+                            else
+                                CallLuaFunc(curState + "_End", this);
                         }
-                        else
-                            EnterState(state.NextState);
                     }
-                    else
-                        CallLuaFunc(curState + "_End", this);
-                }
+                    break;
+                case HitstunStates.CmnHurtStandWeak:
+                case HitstunStates.CmnHurtStandMedium:
+                case HitstunStates.CmnHurtStandHeavy:
+                case HitstunStates.CmnHurtGutWeak:
+                case HitstunStates.CmnHurtGutMedium:
+                case HitstunStates.CmnHurtGutHeavy:
+                case HitstunStates.CmnHurtCrouchWeak:
+                case HitstunStates.CmnHurtCrouchMedium:
+                case HitstunStates.CmnHurtCrouchHeavy:
+                    if(hitstunTime >= 0)
+                    {
+                        hitstunTime--;
+                        break;
+                    }
+                    frameActiveTime++;
+                    if (frameActiveTime >= frameLength)
+                    {
+                        frameActiveTime = -1;
+                        curAnimFrame++;
+                        CallLuaFunc(curState + "_Update", this, curAnimFrame);
+                        if (curAnimFrame >= curAnim.frameCount)
+                        {
+                            EnterState(hitstunState < HitstunStates.CmnHurtCrouchWeak ? "CmnStand" : "CmnCrouch");
+                            hitstunState = HitstunStates.None;
+                            velocity = Vector3.Zero;
+                            velocityMod = Vector3.Zero;
+                            velocityMin = Vector3.Zero;
+                        }
+                    }
+                    break;
+                case HitstunStates.CmnHurtStagger:
+                    frameActiveTime++;
+                    hitstunTime--;
+                    if(hitstunTime <= 0)
+                    {
+                        EnterState("CmnHurtCrumple");
+                        hitstunState = HitstunStates.CmnHurtCrumple;
+                        break;
+                    }
+                    if(frameActiveTime >= frameLength)
+                    {
+                        frameActiveTime = -1;
+                        curAnimFrame++;
+                        CallLuaFunc(curState + "_Update", this, curAnimFrame);
+                        if(curAnimFrame >= curAnim.frameCount)
+                            curAnimFrame = states.HitstunLoopData.StaggerLoopPos;
+                    }
+                    break;
+                case HitstunStates.CmnHurtLaunch:
+                case HitstunStates.CmnHurtLaunchToFall:
+                case HitstunStates.CmnHurtFall:
+                case HitstunStates.CmnHurtTrip:
+                case HitstunStates.CmnHurtBlowback:
+                case HitstunStates.CmnHurtDiagonalSpin:
+                    frameActiveTime++;
+                    hitstunTime--;
+                    if (hitstunTime <= 0 && HasButtons(inputBuffer[0].button, ButtonType.A))
+                    {
+                        if (inputBuffer[0].IsLeft())
+                            velocity.X = -2.0f * oneSixteth;
+                        else if (inputBuffer[0].IsRight())
+                            velocity.X = 2.0f * oneSixteth;
+                        else
+                            velocity.X = 0.0f;
+                        if (inputBuffer[0].IsUp())
+                            velocity.Y = 17.0f;
+                        else if (inputBuffer[0].IsDown())
+                            velocity.Y = 0.0f;
+                        else
+                            velocity.Y = 8.0f;
+                        velocityMod = new Vector3(0.0f, -0.7f, 0.0f);
+                        EnterState("CmnHurtWakeUpAir");
+                        hitstunState = HitstunStates.CmnHurtWakeUpAir;
+                        break;
+                    }
+                    if (frameActiveTime >= frameLength)
+                    {
+                        frameActiveTime = -1;
+                        curAnimFrame++;
+                        CallLuaFunc(curState + "_Update", this, curAnimFrame);
+                        if (curAnimFrame >= curAnim.frameCount)
+                            switch(hitstunState) //switch inside a switch this is so fucking ugly ewwwwww
+                            {
+                                default:
+                                case HitstunStates.CmnHurtLaunch:
+                                    curAnimFrame = states.HitstunLoopData.LaunchLoopPos; break;
+                                case HitstunStates.CmnHurtLaunchToFall:
+                                    EnterState("CmnHurtFall");
+                                    hitstunState = HitstunStates.CmnHurtFall;
+                                    break;
+                                case HitstunStates.CmnHurtFall:
+                                    curAnimFrame = states.HitstunLoopData.FallLoopPos; break;
+                                case HitstunStates.CmnHurtTrip:
+                                    curAnimFrame = states.HitstunLoopData.TripLoopPos; break;
+                                case HitstunStates.CmnHurtBlowback:
+                                    curAnimFrame = states.HitstunLoopData.BlowbackLoopPos; break;
+                                case HitstunStates.CmnHurtDiagonalSpin:
+                                    curAnimFrame = states.HitstunLoopData.DiagonalSpinLoopPos; break;
+                            }
+                    }
+                    break;
+                case HitstunStates.CmnHurtCrumple:
+                case HitstunStates.CmnHurtLandFall:
+                case HitstunStates.CmnHurtLandTrip:
+                    frameActiveTime++;
+                    HKDTime--;
+                    if(HKDTime <= 0 && HasButtons(inputBuffer[0].button, ButtonType.A))
+                    {
+                        if (inputBuffer[0].IsLeft())
+                            velocity.X = -2.0f * oneSixteth;
+                        else if (inputBuffer[0].IsRight())
+                            velocity.X = 2.0f * oneSixteth;
+                        else
+                            velocity.X = 0.0f;
+                        velocity.Y = 14.0f;
+                        velocityMod = new Vector3(0.0f, -0.7f, 0.0f);
+                        EnterState("CmnHurtWakeUpGround");
+                        hitstunState = HitstunStates.CmnHurtWakeUpAir;
+                        break;
+                    }
+                    HKDBeginInvulTime--;
+                    if (HKDBeginInvulTime == 0)
+                        collisionFlags |= CollisionFlags.Invincible;
+                    if (frameActiveTime >= frameLength)
+                    {
+                        frameActiveTime = -1;
+                        curAnimFrame++;
+                        CallLuaFunc(curState + "_Update", this, curAnimFrame);
+                        if(curAnimFrame >= curAnim.frameCount)
+                        {
+                            if(HKDTime <= 0)
+                            {
+                                EnterState("CmnHurtWakeUpLazy");
+                                hitstunState = HitstunStates.CmnHurtWakeUpLazy;
+                            }
+                            else
+                            {
+                                curAnimFrame--;
+                                frameActiveTime = curFrame.frameLength - 1; //just wait until we can wake up
+                            }
+                        }
+                    }
+                    break;
+                case HitstunStates.CmnHurtWakeUpAir:
+                    frameActiveTime++;
+                    if (frameActiveTime >= frameLength)
+                    {
+                        frameActiveTime = -1;
+                        curAnimFrame++;
+                        CallLuaFunc(curState + "_Update", this, curAnimFrame);
+                        if (curAnimFrame >= curAnim.frameCount)
+                            curAnimFrame = states.HitstunLoopData.WakeUpAirLoopPos;
+                    }
+                    break;
+                case HitstunStates.CmnHurtWakeUpGround:
+                    frameActiveTime++;
+                    if (frameActiveTime >= frameLength)
+                    {
+                        frameActiveTime = -1;
+                        curAnimFrame++;
+                        CallLuaFunc(curState + "_Update", this, curAnimFrame);
+                        if (curAnimFrame >= curAnim.frameCount)
+                            curAnimFrame = states.HitstunLoopData.WakeUpGroundLoopPos;
+                    }
+                    break;
+                case HitstunStates.CmnHurtWakeUpLand:
+                case HitstunStates.CmnHurtWakeUpLazy:
+                    frameActiveTime++;
+                    if (frameActiveTime >= frameLength)
+                    {
+                        frameActiveTime = -1;
+                        curAnimFrame++;
+                        CallLuaFunc(curState + "_Update", this, curAnimFrame);
+                        if (curAnimFrame >= curAnim.frameCount)
+                        {
+                            EnterState("CmnStand");
+                            hitstunState = HitstunStates.None;
+                        }
+                    }
+                    break;
             }
 
             #region physics update
             velocity += velocityMod;
             position += new Vector3(velocity.X * (int)dir, velocity.Y, velocity.Z);
+            if(velocity.Y <= 0.0f && (hitstunState == HitstunStates.CmnHurtLaunch || hitstunState == HitstunStates.CmnHurtDiagonalSpin))
+            {
+                EnterState("CmnHurtLaunchToFall");
+                hitstunState = HitstunStates.CmnHurtLaunchToFall;
+            }
             if(collisionFlags.HasFlag(CollisionFlags.Floor) && position.Y < 0.0f)
             {
                 position.Y = 0.0f;
                 velocity.Y = 0.0f;
                 velocityMod.Y = 0.0f;
-                if(states.HasState(curState))
+                if(hitstunState >= HitstunStates.CmnHurtLaunch && hitstunState <= HitstunStates.CmnHurtDiagonalSpin)
+                {
+                    if(hitstunState == HitstunStates.CmnHurtTrip)
+                    {
+                        EnterState("CmnHurtLandTrip");
+                        hitstunState = HitstunStates.CmnHurtLandTrip;
+                    }    
+                    else
+                    {
+                        EnterState("CmnHurtLandFall");
+                        hitstunState = HitstunStates.CmnHurtLandFall;
+                    }
+                }
+                else if(states.HasState(curState))
                 {
                     StateList.State state = states.GetState(curState);
                     if (state.LandToState)
@@ -198,8 +477,16 @@ namespace BooBoo.Battle
                 if (ourPush == null || theirPush == null)
                     continue;
 
+                if (dir == Direction.Right)
+                    ourPush = ourPush.Value.Flip();
+
+                if(actor.dir == Direction.Right)
+                    theirPush = theirPush.Value.Flip();
+
                 if (!ourPush.Value.Overlaps(position.XY(), theirPush.Value, actor.position.XY()))
                     continue;
+
+                //Console.WriteLine("Cols Overlap");
 
                 Vector2 boxDist = ourPush.Value.GetDistanceFrom(position.XY(), theirPush.Value, actor.position.XY());
 
@@ -227,6 +514,43 @@ namespace BooBoo.Battle
                 position.X = (stage.stageWidth - wallPushboxWidth) * MathF.Sign(position.X);
             //Console.WriteLine(position + "\t" + velocity + "\t" + opponentDist);
 
+            //Hit Collision
+            Vector2 ourPosXY = position.XY();
+            foreach(BattleActor actor in gameState.actors)
+            {
+                if (actor == this) continue;
+                if (actor.player == player && !collisionFlags.HasFlag(CollisionFlags.AttackMembersOfSameTeam)) continue;
+
+                Vector2 theirPosXY = actor.position.XY();
+                //the real meat of updating :skull:
+                //holy fuck i need a way to optimize this
+                for(int i = 0; i < colliders.Length; i++)
+                {
+                    RectCollider ourBox = colliders[i];
+                    if (dir == Direction.Right)
+                        ourBox = ourBox.Flip();
+                    for(int j = 0; j < actor.colliders.Length; j++)
+                    {
+                        RectCollider theirBox = actor.colliders[j];
+                        if (actor.dir == Direction.Right)
+                            theirBox = theirBox.Flip();
+                        if (ourBox.Overlaps(ourPosXY, theirBox, theirPosXY))
+                        {
+                            switch (ourBox.colliderType)
+                            {
+                                case RectCollider.ColliderType.Hurt:
+                                    if(!InvulToAttrib(actor.attackAttribute) && !actor.actorsHit.Contains(this))
+                                        willBeHit = true;
+                                    break;
+                                case RectCollider.ColliderType.Hit:
+                                    if (!actor.InvulToAttrib(attackAttribute) && !actorsWillHit.Contains(actor))
+                                        actorsWillHit.Add(actor);
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
             #endregion
 
             #region buffer update
@@ -384,7 +708,12 @@ namespace BooBoo.Battle
 
         public void EnterState(string state, bool callEnd = true)
         {
-            if(callEnd)
+            //Remove invincibility
+            collisionFlags &= CollisionFlags.Invincible;
+            collisionFlags &= CollisionFlags.InvulLow;
+            collisionFlags &= CollisionFlags.InvulHigh;
+            collisionFlags &= CollisionFlags.InvulProjectile;
+            if (callEnd)
                 CallLuaFunc(curState + "_End", this);
             curState = state;
             curAnimName = state;
@@ -395,6 +724,7 @@ namespace BooBoo.Battle
             if(states.HasState(state))
             {
                 StateList.State cancel = states.GetState(state);
+                curStatePos = cancel.Position; //this is such a shoehorn 💀
                 StateList.State current = states.GetState(curState);
                 List<StateList.State> allStates;
                 switch(cancel.stateType)
@@ -470,7 +800,89 @@ namespace BooBoo.Battle
 
         public bool TouchingDistanceWall(Vector3 opponentDist)
         {
-            return collisionFlags.HasFlag(CollisionFlags.DistanceWall) && MathF.Abs(opponentDist.X + wallPushboxWidth * MathF.Sign(position.X)) > stage.maxPlayerDistance;
+            return collisionFlags.HasFlag(CollisionFlags.DistanceWall) && 
+                MathF.Abs(opponentDist.X + wallPushboxWidth * MathF.Sign(position.X)) > stage.maxPlayerDistance;
+        }
+
+        public bool InvulToAttrib(AttackHitAttribute attribute)
+        {
+            if (collisionFlags.HasFlag(CollisionFlags.Invincible))
+                return false;
+            switch(attackAttribute)
+            {
+                default:
+                case AttackHitAttribute.Body:
+                    return false;
+                case AttackHitAttribute.Low:
+                    return collisionFlags.HasFlag(CollisionFlags.InvulLow);
+                case AttackHitAttribute.High:
+                    return collisionFlags.HasFlag(CollisionFlags.InvulHigh);
+                case AttackHitAttribute.Projectile:
+                    return collisionFlags.HasFlag(CollisionFlags.InvulProjectile);
+            }
+        }
+
+        public void AttackMacroWeak()
+        {
+            RefreshHit();
+            damage = 20;
+            hitstopOnHit = 7;
+            hitstunOnHit = 15;
+            HKDOnHit = 0;
+            HKDInvulTimerOnHit = -1;
+            crumpleOnHit = false;
+            dirOnHitGround = new Vector2(-0.6f * oneSixteth, 0.0f);
+            dirModOnHitGround = Vector2.Zero;
+            dirMinOnHitGround = Vector2.Zero;
+            dirOnHitAir = new Vector2(0.6f * oneSixteth, 12.0f * oneSixteth);
+            dirModOnHitAir = new Vector2(0.0f, -0.7f * oneSixteth);
+            dirMinOnHitAir = Vector2.Zero;
+            hitStateStanding = HitstunStates.CmnHurtStandWeak;
+            hitStateCrouching = HitstunStates.CmnHurtCrouchWeak;
+            hitStateAerial = HitstunStates.CmnHurtLaunch;
+            attackAttribute = AttackHitAttribute.Body;
+        }
+
+        public void AttackMacroMedium()
+        {
+            RefreshHit();
+            damage = 30;
+            hitstopOnHit = 9;
+            hitstunOnHit = 20;
+            HKDOnHit = 0;
+            HKDInvulTimerOnHit = -1;
+            crumpleOnHit = false;
+            dirOnHitGround = new Vector2(-0.9f * oneSixteth, 0.0f);
+            dirModOnHitGround = Vector2.Zero;
+            dirMinOnHitGround = Vector2.Zero;
+            dirOnHitAir = new Vector2(0.9f * oneSixteth, 17.0f * oneSixteth);
+            dirModOnHitAir = new Vector2(0.0f, -0.7f * oneSixteth);
+            dirMinOnHitAir = Vector2.Zero;
+            hitStateStanding = HitstunStates.CmnHurtStandMedium;
+            hitStateCrouching = HitstunStates.CmnHurtCrouchMedium;
+            hitStateAerial = HitstunStates.CmnHurtLaunch;
+            attackAttribute = AttackHitAttribute.Body;
+        }
+
+        public void AttackMacroHeavy()
+        {
+            RefreshHit();
+            damage = 40;
+            hitstopOnHit = 12;
+            hitstunOnHit = 20;
+            HKDOnHit = 0;
+            HKDInvulTimerOnHit = -1;
+            crumpleOnHit = false;
+            dirOnHitGround = new Vector2(-1.3f * oneSixteth, 0.0f);
+            dirModOnHitGround = Vector2.Zero;
+            dirMinOnHitGround = Vector2.Zero;
+            dirOnHitAir = new Vector2(0.6f * oneSixteth, 22.0f * oneSixteth);
+            dirModOnHitAir = new Vector2(0.0f, -0.7f * oneSixteth);
+            dirMinOnHitAir = Vector2.Zero;
+            hitStateStanding = HitstunStates.CmnHurtStandHeavy;
+            hitStateCrouching = HitstunStates.CmnHurtCrouchHeavy;
+            hitStateAerial = HitstunStates.CmnHurtLaunch;
+            attackAttribute = AttackHitAttribute.Body;
         }
 
         public void Delete()
@@ -522,6 +934,11 @@ namespace BooBoo.Battle
         public void FaceActor(BattleActor actor)
         {
             dir = (Direction)MathF.Sign(GetDistanceFrom(actor).X);
+        }
+
+        public void RefreshHit()
+        {
+            actorsHit.Clear();
         }
 
         public void SetOpponent(BattleActor opponent)
@@ -656,6 +1073,26 @@ namespace BooBoo.Battle
             public override int GetHashCode()
             {
                 return direction ^ (int)button ^ timeInBuffer ^ chargeTime;
+            }
+
+            public bool IsRight()
+            {
+                return direction == 9 || direction == 6 || direction == 3;
+            }
+
+            public bool IsLeft()
+            {
+                return direction == 7 || direction == 4 || direction == 1;
+            }
+
+            public bool IsUp()
+            {
+                return direction == 7 || direction == 8 || direction == 9;
+            }
+
+            public bool IsDown()
+            {
+                return direction == 1 || direction == 2 || direction == 3;
             }
         }
     }
