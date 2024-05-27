@@ -113,6 +113,10 @@ namespace BooBoo.Battle
             public int BlowbackLoopPos;
             [JsonProperty("DiagonalSpinLoopPos")]
             public int DiagonalSpinLoopPos;
+            [JsonProperty("WakeUpAirLoopPos")]
+            public int WakeUpAirLoopPos;
+            [JsonProperty("WakeUpGroundLoopPos")]
+            public int WakeUpGroundLoopPos;
         }
     }
 }
