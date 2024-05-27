@@ -61,39 +61,41 @@ namespace BooBoo.Battle
         public class State
         {
             [JsonProperty("Name")]
-            public string Name;
+            public string Name = "";
             [JsonProperty("Position")]
-            public StatePosition Position;
+            public StatePosition Position = StatePosition.Standing;
             [JsonProperty("Input")]
-            public InputType Input;
+            public InputType Input = InputType.None;
             [JsonProperty("Button")]
-            public ButtonType Button;
+            public ButtonType Button = 0;
             [JsonProperty("Priority")]
-            public int Priority;
+            public int Priority = 0;
             [JsonProperty("CancelType")]
-            public CancelType CancelType;
+            public CancelType CancelType = CancelType.Whenever;
             [JsonProperty("CounterType")]
-            public CounterType CounterType;
+            public CounterType CounterType = CounterType.None;
             [JsonProperty("HitOrBlockCancels")]
-            public string[] HitOrBlockCancels;
+            public string[] HitOrBlockCancels = new string[0];
             [JsonProperty("HitCancels")]
-            public string[] HitCancels;
+            public string[] HitCancels = new string[0];
             [JsonProperty("WhiffCancels")]
-            public string[] WhiffCancels;
+            public string[] WhiffCancels = new string[0];
+            [JsonProperty("AutoAddCancels")]
+            public bool AutoAddCancels = true;
             [JsonProperty("Looping")]
-            public bool Looping;
+            public bool Looping = false;
             [JsonProperty("LoopPos")]
-            public int LoopPos;
+            public int LoopPos = 0;
             [JsonProperty("NextState")]
-            public string NextState;
+            public string NextState = "CmnStand";
             [JsonProperty("LandToState")]
-            public bool LandToState;
+            public bool LandToState = false;
             [JsonProperty("LandState")]
-            public string LandState;
+            public string LandState = "CmnLand";
             [JsonProperty("StateCanTurn")]
-            public bool StateCanTurn;
+            public bool StateCanTurn = false;
             [JsonProperty("TurnState")]
-            public string TurnState;
+            public string TurnState = "";
             public StateType stateType;
         }
 

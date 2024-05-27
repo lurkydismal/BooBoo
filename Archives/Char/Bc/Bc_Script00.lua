@@ -3,7 +3,7 @@ local iz
 local izActive = false
 
 function MatchInit(actor)
-	actor.curHealth = 400
+	actor.curHealth = 420
 	actor.maxHealth = 420
 	yu = actor
 	iz = actor:CreateChild("Iz", 0.0, 0.0)
