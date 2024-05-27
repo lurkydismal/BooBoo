@@ -65,6 +65,15 @@ namespace BooBoo.Battle
         OnlyWhenSpecified,
     }
 
+    public enum AttackHitAttribute
+    {
+        Body,
+        Low,
+        High,
+        Projectile
+    }
+
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum StatePosition
     {
         Standing,
@@ -123,6 +132,12 @@ namespace BooBoo.Battle
         MiscCountAsHit = 0b_0000_0100_0000_0000,
         MiscCountsAsObjLink = 0b_0000_1000_0000_0000,
         MiscCallsFuncOnOverlap = 0b_0001_0000_0000_0000,
+
+        //Attack Hit Attribute specific invuls
+        //if you want body invul just add normal invul :skull:
+        InvulLow = 0b_0010_0000_0000_0000,
+        InvulHigh = 0b_0100_0000_0000_0000,
+        InvulProjectile = 0b_1000_0000_0000_0000,
 
         
 
