@@ -14,7 +14,7 @@ namespace BooBoo.Util
 #if DEBUG
             return ProjectPath + path;
 #else
-            return Environment.CurrentDirectory + '/' + path;
+            return Environment.CurrentDirectory + "/Data/" + path;
 #endif
         }
 
