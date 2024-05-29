@@ -18,9 +18,4 @@
     <ProjectReference Include="..\BlakieLibSharp\BlakieLibSharp.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Data\Shader\" />
-    <Folder Include="Data\UI\Csel\" />
-  </ItemGroup>
-
 </Project>
