@@ -904,6 +904,16 @@ namespace BooBoo.Battle
                 children[i].Delete();
         }
 
+        public void QueueDeleteEffect(string eff)
+        {
+
+        }
+
+        public void QueueDeleteEffect(EffectActor eff)
+        {
+
+        }
+
         public void CallLuaFunc(string function, params object[] args)
         {
             LuaFunction func = luaCode[function] as LuaFunction;
