@@ -109,7 +109,6 @@ namespace BooBoo.Battle
         public int frameLength { get { return curFrame.frameLength; } }
 
         List<string> hitCancels = new List<string>();
-        List<string> blockCancels = new List<string>();
         List<string> hitOrBlockCancles = new List<string>();
         List<StateList.State> cancableStates = new List<StateList.State>();
         List<BufferItem> inputBuffer = new List<BufferItem>() { new BufferItem() };
@@ -721,41 +720,48 @@ namespace BooBoo.Battle
             frameActiveTime = -1;
 
             cancableStates.Clear();
+            hitCancels.Clear();
+            hitOrBlockCancles.Clear();
             if(states.HasState(state))
             {
                 StateList.State cancel = states.GetState(state);
                 curStatePos = cancel.Position; //this is such a shoehorn 💀
                 StateList.State current = states.GetState(curState);
                 List<StateList.State> allStates;
-                switch(cancel.stateType)
-                {
-                    default:
-                    case StateType.Neutral:
-                        allStates = states.AllStates;
-                        foreach (StateList.State sta in allStates)
-                        {
-                            if (sta.Name == curState || sta.Name == current.NextState ||
-                                (sta.Position != current.Position && (sta.stateType != StateType.Neutral || sta.stateType != StateType.Normal)))
-                                continue;
-                            if (sta.CancelType == CancelType.OnlyHitOrBlock || sta.CancelType == CancelType.OnlyWhenSpecified)
-                                continue;
-                            cancableStates.Add(sta);
-                        }
-                        break;
-                    case StateType.Normal:
-                        allStates = new List<StateList.State>();
-                        allStates.AddRange(states.SpecialStates);
-                        allStates.AddRange(states.SuperStates);
-                        foreach(StateList.State sta in allStates)
-                        {
-                            if (current.Position == StatePosition.Aerial && sta.Position != StatePosition.Aerial)
-                                continue;
-                            if (sta.CancelType != CancelType.Whenever)
-                                continue;
-                            cancableStates.Add(sta);
-                        }
-                        break;
-                }
+                if(current.AutoAddCancels)
+                    switch(cancel.stateType)
+                    {
+                        default:
+                        case StateType.Neutral:
+                            allStates = states.AllStates;
+                            foreach (StateList.State sta in allStates)
+                            {
+                                if (sta.Name == curState || sta.Position != current.Position)
+                                    continue;
+                                if (sta.CancelType == CancelType.OnlyHitOrBlock || sta.CancelType == CancelType.OnlyWhenSpecified)
+                                    continue;
+                                cancableStates.Add(sta);
+                            }
+                            break;
+                        case StateType.Normal:
+                            allStates = new List<StateList.State>();
+                            allStates.AddRange(states.SpecialStates);
+                            allStates.AddRange(states.SuperStates);
+                            foreach(StateList.State sta in allStates)
+                            {
+                                if (current.Position == StatePosition.Aerial && sta.Position != StatePosition.Aerial)
+                                    continue;
+                                if (sta.CancelType != CancelType.Whenever)
+                                    continue;
+                                cancableStates.Add(sta);
+                            }
+                            break;
+                    }
+                foreach (string sta in cancel.WhiffCancels)
+                    if (states.HasState(sta))
+                        cancableStates.Add(states.GetState(sta));
+                hitCancels.AddRange(cancel.HitCancels);
+                hitOrBlockCancles.AddRange(cancel.HitOrBlockCancels);
             }
 
             CallLuaFunc(state + "_Init", this);
