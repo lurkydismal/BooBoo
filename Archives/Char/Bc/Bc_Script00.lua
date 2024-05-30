@@ -81,6 +81,14 @@ function NmlAtk5A1st_Init(actor)
 	actor:AttackMacroWeak();
 	end
 
+function NmlAtk5A2nd_Init(actor)
+	actor:AttackMacroMedium();
+	end
+
+function NmlAtk5A3rd_Init(actor)
+	actor:AttackMacroHeavy();
+	end
+
 function NmlAtk5C_Update(actor, frame)
 	if frame == 1 then
 		SetPersonaMove("Iz_Atk5C", 0.6, 0.0, 5.0, 0.01)

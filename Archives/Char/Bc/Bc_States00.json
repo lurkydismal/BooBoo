@@ -118,6 +118,28 @@
 			"Button": 1,
 			"Priority": 1,
 			"CounterType": "Normal",
+			"HitOrBlockCancels": [
+				"NmlAtk5A2nd"
+			]
+		},
+		{
+			"Name": "NmlAtk5A2nd",
+			"Input": "Standing_Any",
+			"Button": 1,
+			"Priority": 2,
+			"CancelType": "OnlyWhenSpecified",
+			"CounterType": "Normal",
+			"HitOrBlockCancels": [
+				"NmlAtk5A3rd"
+			]
+		},
+		{
+			"Name": "NmlAtk5A3rd",
+			"Input": "Standing_Any",
+			"Button": 1,
+			"Priority": 2,
+			"CancelType": "OnlyWhenSpecified",
+			"CounterType": "Normal",
 			"HitOrBlockCancels": []
 		},
 		{
@@ -125,7 +147,7 @@
 			"Input": "Standing_Any",
 			"Button": 4,
 			"Priority": 3,
-			"CounterType": "Normal",
+			"CounterType": "Normal"
 		}
 	],
 	"SpecialStates": [],
