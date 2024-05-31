@@ -25,8 +25,10 @@ namespace BooBoo.Battle
         public void DrawLayer1()
         {
             //what the fuck
-            drawer.DrawBlendedFrame(Vector2.Zero, Vector2.One, "HealthBarEmptyP1", "HealthBarFullP1", (float)((float)player1.curHealth / (float)player1.maxHealth));
-            drawer.DrawBlendedFrame(Vector2.Zero, Vector2.One, "HealthBarEmptyP2", "HealthBarFullP2", (float)((float)player2.curHealth / (float)player2.maxHealth));
+            float p1Health = Math.Clamp((float)((float)player1.curHealth / (float)player1.maxHealth), 0.0f, 1.0f);
+            float p2Health = Math.Clamp((float)((float)player2.curHealth / (float)player2.maxHealth), 0.0f, 1.0f);
+            drawer.DrawBlendedFrame(Vector2.Zero, Vector2.One, "HealthBarEmptyP1", "HealthBarFullP1", p1Health);
+            drawer.DrawBlendedFrame(Vector2.Zero, Vector2.One, "HealthBarEmptyP2", "HealthBarFullP2", p2Health);
             drawer.DrawSingleFrame(Vector2.Zero, Vector2.One, "Top");
         }
     }
