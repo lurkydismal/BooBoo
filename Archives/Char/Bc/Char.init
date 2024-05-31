@@ -6,6 +6,7 @@
   "Sprites": [
     "Bc_Spr.dpspr"
   ],
+  "Effects": "Bc_Eff00.prman",
   "PalCount": 1,
   "Palettes": [
     {

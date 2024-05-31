@@ -89,6 +89,12 @@ function NmlAtk5A3rd_Init(actor)
 	actor:AttackMacroHeavy();
 	end
 
+function NmlAtk5A3rd_Update(actor, frame)
+	if frame == 3 then
+		actor:SpawnEffect("bc202_eff", 0.0, 0.0)
+		end
+	end
+
 function NmlAtk5C_Update(actor, frame)
 	if frame == 1 then
 		SetPersonaMove("Iz_Atk5C", 0.6, 0.0, 5.0, 0.01)

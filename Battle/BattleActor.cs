@@ -36,6 +36,7 @@ namespace BooBoo.Battle
         public int curPalNum = 0;
         public Texture2D[] palTextures { get; private set; }
         public Color multColor = Color.White;
+        public PrmAn effects { get; private set; }
         public DPSpr sprites { get; private set; }
         public SprAn sprAn { get; protected set; }
         public StateList states { get; private set; }
@@ -120,6 +121,9 @@ namespace BooBoo.Battle
         public BattleActor player { get; private set; }
         bool isPlayer = false;
 
+        public Dictionary<string, EffectActor> effectsActive = new Dictionary<string, EffectActor>();
+        List<string> effectsToDelete = new List<string>();
+
         public const float oneSixteth = 1.0f / 60.0f;
         public const float oneTwelveth = 1.0f / 12.0f;
 
@@ -155,6 +159,10 @@ namespace BooBoo.Battle
 
         public void Update()
         {
+            //update effects
+            foreach (EffectActor eff in effectsActive.Values)
+                eff.Update();
+
             if (curFrame == null)
             {
                 actorsWillHit.Clear();
@@ -229,7 +237,7 @@ namespace BooBoo.Battle
 
                     if (frameActiveTime >= frameLength)
                     {
-                        frameActiveTime = -1;
+                        frameActiveTime = 0;
                         curAnimFrame++;
                         CallLuaFunc(curState + "_Update", this, curAnimFrame);
                         if (curAnimFrame >= curAnim.frameCount)
@@ -268,7 +276,7 @@ namespace BooBoo.Battle
                     frameActiveTime++;
                     if (frameActiveTime >= frameLength)
                     {
-                        frameActiveTime = -1;
+                        frameActiveTime = 0;
                         curAnimFrame++;
                         CallLuaFunc(curState + "_Update", this, curAnimFrame);
                         if (curAnimFrame >= curAnim.frameCount)
@@ -292,7 +300,7 @@ namespace BooBoo.Battle
                     }
                     if(frameActiveTime >= frameLength)
                     {
-                        frameActiveTime = -1;
+                        frameActiveTime = 0;
                         curAnimFrame++;
                         CallLuaFunc(curState + "_Update", this, curAnimFrame);
                         if(curAnimFrame >= curAnim.frameCount)
@@ -328,7 +336,7 @@ namespace BooBoo.Battle
                     }
                     if (frameActiveTime >= frameLength)
                     {
-                        frameActiveTime = -1;
+                        frameActiveTime = 0;
                         curAnimFrame++;
                         CallLuaFunc(curState + "_Update", this, curAnimFrame);
                         if (curAnimFrame >= curAnim.frameCount)
@@ -376,7 +384,7 @@ namespace BooBoo.Battle
                         collisionFlags |= CollisionFlags.Invincible;
                     if (frameActiveTime >= frameLength)
                     {
-                        frameActiveTime = -1;
+                        frameActiveTime = 0;
                         curAnimFrame++;
                         CallLuaFunc(curState + "_Update", this, curAnimFrame);
                         if(curAnimFrame >= curAnim.frameCount)
@@ -398,7 +406,7 @@ namespace BooBoo.Battle
                     frameActiveTime++;
                     if (frameActiveTime >= frameLength)
                     {
-                        frameActiveTime = -1;
+                        frameActiveTime = 0;
                         curAnimFrame++;
                         CallLuaFunc(curState + "_Update", this, curAnimFrame);
                         if (curAnimFrame >= curAnim.frameCount)
@@ -409,7 +417,7 @@ namespace BooBoo.Battle
                     frameActiveTime++;
                     if (frameActiveTime >= frameLength)
                     {
-                        frameActiveTime = -1;
+                        frameActiveTime = 0;
                         curAnimFrame++;
                         CallLuaFunc(curState + "_Update", this, curAnimFrame);
                         if (curAnimFrame >= curAnim.frameCount)
@@ -421,7 +429,7 @@ namespace BooBoo.Battle
                     frameActiveTime++;
                     if (frameActiveTime >= frameLength)
                     {
-                        frameActiveTime = -1;
+                        frameActiveTime = 0;
                         curAnimFrame++;
                         CallLuaFunc(curState + "_Update", this, curAnimFrame);
                         if (curAnimFrame >= curAnim.frameCount)
@@ -631,6 +639,12 @@ namespace BooBoo.Battle
                 }
             }
             #endregion
+
+            //delete effects
+            foreach (string eff in effectsToDelete)
+                if (effectsActive.ContainsKey(eff))
+                    effectsActive.Remove(eff);
+            effectsToDelete.Clear();
         }
 
         public void Draw()
@@ -718,6 +732,15 @@ namespace BooBoo.Battle
 
                 Raylib.EndShaderMode();
             }
+
+            foreach (EffectActor eff in effectsActive.Values)
+                eff.Draw();
+        }
+
+        public void Draw2DEffects()
+        {
+            foreach (EffectActor actor in effectsActive.Values)
+                actor.Draw2D();
         }
 
         public void EnterState(string state, bool callEnd = true)
@@ -907,7 +930,7 @@ namespace BooBoo.Battle
         }
 
         public void Delete()
-        {
+        { 
             if(isPlayer)
             {
                 Console.WriteLine("Trying to delete player, unable to do that, only delete children of player");
@@ -919,14 +942,23 @@ namespace BooBoo.Battle
                 children[i].Delete();
         }
 
-        public void QueueDeleteEffect(string eff)
+        public EffectActor SpawnEffect(string animName, float offsetX, float offsetY, 
+            bool loop = false, EffectActor.EffectFlags flags = EffectActor.EffectFlags.Default)
         {
-
+            EffectActor actor = EffectActor.BeginAnim(this, effects, false, animName, loop);
+            actor.dir = dir;
+            actor.SetFlags(flags);
+            if (flags.HasFlag(EffectActor.EffectFlags.FollowActorPos))
+                actor.position = new Vector3(offsetX, offsetY, 0.0f);
+            else
+                actor.position = position + new Vector3(offsetX, offsetY, 0.0f);
+            effectsActive.Add(animName, actor);
+            return actor;
         }
 
-        public void QueueDeleteEffect(EffectActor eff)
+        public void QueueDeleteEffect(string eff)
         {
-
+            effectsToDelete.Add(eff);
         }
 
         public void CallLuaFunc(string function, params object[] args)
@@ -975,6 +1007,12 @@ namespace BooBoo.Battle
         public void SetOpponent(BattleActor opponent)
         {
             this.opponent = opponent;
+        }
+
+        public void SetEffects(PrmAn effects)
+        {
+            if (this.effects == null)
+                this.effects = effects;
         }
 
         public Vector3 GetDistanceFrom(BattleActor other)

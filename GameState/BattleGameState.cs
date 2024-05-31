@@ -29,7 +29,7 @@ namespace BooBoo.GameState
         RenderTexture2D bgTex, uiTex1, charTex, charBoxTex, uiTex2, superBg;
         Rectangle renderTexRect;
 
-        public bool drawBoxes = true;
+        public bool drawBoxes = false;
         static readonly Color[] colliderTypeColors = {
             new Color(255, 255, 60, 180),
             new Color(90, 255, 60, 180),
@@ -62,6 +62,9 @@ namespace BooBoo.GameState
                 CharLoadDat charLoad = JsonConvert.DeserializeObject<CharLoadDat>(charArc.GetFile("Char.init").DataAsString());
                 DPSpr charSprite = new DPSpr(charArc.GetFile(charLoad.Sprites[0]).data);
                 charSprite.LoadTexturesToGPU();
+                PrmAn effects = charArc.FileExists(charLoad.Effects) ? new PrmAn(charArc.GetFile(charLoad.Effects).data) : null;
+                if (effects != null)
+                    effects.LoadTexturesToGPU();
                 StateList charList = JsonConvert.DeserializeObject<StateList>(charArc.GetFile(charLoad.StateLists[0]).DataAsString());
                 charList.UpdateStateMap();
                 SprAn yuSprAn = new SprAn(charArc.GetFile(charLoad.SprAn).data);
@@ -76,13 +79,17 @@ namespace BooBoo.GameState
                 }
                 Lua luaCode = new Lua();
                 luaCode.DoString(charArc.GetFile(charLoad.Scripts[0]).DataAsString());
-                actors.Add(new BattleActor(yuSprAn, charList, inputs[i], luaCode, "CmnStand", charLoad.RenderMode, charSprite, palTextures));
+                BattleActor actor = new BattleActor(yuSprAn, charList, inputs[i], luaCode, "CmnStand", charLoad.RenderMode, charSprite, palTextures);
+                actor.SetEffects(effects);
+                actors.Add(actor);
                 charArc.Dispose();
                 Console.WriteLine("Finished Loading char " + i);
                 if(i == 0 && charIds[1] == charIds[0])
                 {
                     i++;
-                    actors.Add(new BattleActor(yuSprAn, charList, inputs[i], luaCode, "CmnStand", charLoad.RenderMode, charSprite, palTextures));
+                    actor = new BattleActor(yuSprAn, charList, inputs[i], luaCode, "CmnStand", charLoad.RenderMode, charSprite, palTextures);
+                    actor.SetEffects(effects);
+                    actors.Add(actor);
                 }
             }
             if (actors.Count == 2)
@@ -192,6 +199,8 @@ namespace BooBoo.GameState
             public int CostumeCount;
             [JsonProperty("Sprites")]
             public string[] Sprites;
+            [JsonProperty("Effects")]
+            public string Effects;
             [JsonProperty("PalCount")]
             public int PalCount;
             [JsonProperty("Palettes")]
