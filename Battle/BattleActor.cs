@@ -204,6 +204,9 @@ namespace BooBoo.Battle
 
                     //hit code
                     hitstopTime = hitstopOnHit;
+                    foreach(string state in hitOrBlockCancles)
+                        if(states.HasState(state))
+                            cancableStates.Add(states.GetState(state));
                     actorsHit.Add(actor);
                     CallLuaFunc(curState + "_Hit", this, actor);
                 }
@@ -708,10 +711,10 @@ namespace BooBoo.Battle
         public void EnterState(string state, bool callEnd = true)
         {
             //Remove invincibility
-            collisionFlags &= CollisionFlags.Invincible;
-            collisionFlags &= CollisionFlags.InvulLow;
-            collisionFlags &= CollisionFlags.InvulHigh;
-            collisionFlags &= CollisionFlags.InvulProjectile;
+            collisionFlags |= ~CollisionFlags.Invincible;
+            collisionFlags |= ~CollisionFlags.InvulLow;
+            collisionFlags |= ~CollisionFlags.InvulHigh;
+            collisionFlags |= ~CollisionFlags.InvulProjectile;
             if (callEnd)
                 CallLuaFunc(curState + "_End", this);
             curState = state;
@@ -837,12 +840,12 @@ namespace BooBoo.Battle
             HKDOnHit = 0;
             HKDInvulTimerOnHit = -1;
             crumpleOnHit = false;
-            dirOnHitGround = new Vector2(-0.6f * oneSixteth, 0.0f);
-            dirModOnHitGround = Vector2.Zero;
-            dirMinOnHitGround = Vector2.Zero;
-            dirOnHitAir = new Vector2(0.6f * oneSixteth, 12.0f * oneSixteth);
-            dirModOnHitAir = new Vector2(0.0f, -0.7f * oneSixteth);
-            dirMinOnHitAir = Vector2.Zero;
+            dirOnHitGround = new Vector2(-3.4f * oneSixteth, 0.0f);
+            dirModOnHitGround = new Vector2(0.45f * oneSixteth, 0.0f);
+            dirMinOnHitGround = new Vector2(-0.01f * oneSixteth, 0.0f);
+            dirOnHitAir = new Vector2(-3.4f * oneSixteth, 12.0f * oneSixteth);
+            dirModOnHitAir = new Vector2(0.45f, -0.7f * oneSixteth);
+            dirMinOnHitAir = new Vector2(-0.01f * oneSixteth, 0.0f);
             hitStateStanding = HitstunStates.CmnHurtStandWeak;
             hitStateCrouching = HitstunStates.CmnHurtCrouchWeak;
             hitStateAerial = HitstunStates.CmnHurtLaunch;
@@ -858,10 +861,10 @@ namespace BooBoo.Battle
             HKDOnHit = 0;
             HKDInvulTimerOnHit = -1;
             crumpleOnHit = false;
-            dirOnHitGround = new Vector2(-0.9f * oneSixteth, 0.0f);
+            dirOnHitGround = new Vector2(-1.6f * oneSixteth, 0.0f);
             dirModOnHitGround = Vector2.Zero;
             dirMinOnHitGround = Vector2.Zero;
-            dirOnHitAir = new Vector2(0.9f * oneSixteth, 17.0f * oneSixteth);
+            dirOnHitAir = new Vector2(-1.6f * oneSixteth, 17.0f * oneSixteth);
             dirModOnHitAir = new Vector2(0.0f, -0.7f * oneSixteth);
             dirMinOnHitAir = Vector2.Zero;
             hitStateStanding = HitstunStates.CmnHurtStandMedium;
@@ -879,10 +882,10 @@ namespace BooBoo.Battle
             HKDOnHit = 0;
             HKDInvulTimerOnHit = -1;
             crumpleOnHit = false;
-            dirOnHitGround = new Vector2(-1.3f * oneSixteth, 0.0f);
+            dirOnHitGround = new Vector2(-2.6f * oneSixteth, 0.0f);
             dirModOnHitGround = Vector2.Zero;
             dirMinOnHitGround = Vector2.Zero;
-            dirOnHitAir = new Vector2(0.6f * oneSixteth, 22.0f * oneSixteth);
+            dirOnHitAir = new Vector2(-2.6f * oneSixteth, 22.0f * oneSixteth);
             dirModOnHitAir = new Vector2(0.0f, -0.7f * oneSixteth);
             dirMinOnHitAir = Vector2.Zero;
             hitStateStanding = HitstunStates.CmnHurtStandHeavy;
