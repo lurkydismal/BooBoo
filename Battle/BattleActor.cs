@@ -435,6 +435,18 @@ namespace BooBoo.Battle
 
             #region physics update
             velocity += velocityMod;
+            if ((MathF.Sign(velocityMin.X) == 1 && velocity.X <= velocityMin.X) ||
+                (MathF.Sign(velocityMin.X) == -1 && velocity.X >= velocityMin.X))
+            {
+                velocity.X = velocityMin.X;
+                velocityMod.X = 0.0f;
+            }
+            if ((MathF.Sign(velocityMin.Y) == 1 && velocity.Y <= velocityMin.Y) ||
+                (MathF.Sign(velocityMin.Y) == -1 && velocity.Y >= velocityMin.Y))
+            {
+                velocity.Y = velocityMin.Y;
+                velocityMod.Y = 0.0f;
+            }
             position += new Vector3(velocity.X * (int)dir, velocity.Y, velocity.Z);
             if(velocity.Y <= 0.0f && (hitstunState == HitstunStates.CmnHurtLaunch || hitstunState == HitstunStates.CmnHurtDiagonalSpin))
             {
@@ -840,12 +852,12 @@ namespace BooBoo.Battle
             HKDOnHit = 0;
             HKDInvulTimerOnHit = -1;
             crumpleOnHit = false;
-            dirOnHitGround = new Vector2(-3.4f * oneSixteth, 0.0f);
-            dirModOnHitGround = new Vector2(0.45f * oneSixteth, 0.0f);
+            dirOnHitGround = new Vector2(-4.6f * oneSixteth, 0.0f);
+            dirModOnHitGround = new Vector2(0.5f * oneSixteth, 0.0f);
             dirMinOnHitGround = new Vector2(-0.01f * oneSixteth, 0.0f);
-            dirOnHitAir = new Vector2(-3.4f * oneSixteth, 12.0f * oneSixteth);
-            dirModOnHitAir = new Vector2(0.45f, -0.7f * oneSixteth);
-            dirMinOnHitAir = new Vector2(-0.01f * oneSixteth, 0.0f);
+            dirOnHitAir = new Vector2(-4.6f * oneSixteth, 12.0f * oneSixteth);
+            dirModOnHitAir = new Vector2(0.0f, -0.7f * oneSixteth);
+            dirMinOnHitAir = Vector2.Zero;
             hitStateStanding = HitstunStates.CmnHurtStandWeak;
             hitStateCrouching = HitstunStates.CmnHurtCrouchWeak;
             hitStateAerial = HitstunStates.CmnHurtLaunch;
@@ -861,10 +873,10 @@ namespace BooBoo.Battle
             HKDOnHit = 0;
             HKDInvulTimerOnHit = -1;
             crumpleOnHit = false;
-            dirOnHitGround = new Vector2(-1.6f * oneSixteth, 0.0f);
-            dirModOnHitGround = Vector2.Zero;
-            dirMinOnHitGround = Vector2.Zero;
-            dirOnHitAir = new Vector2(-1.6f * oneSixteth, 17.0f * oneSixteth);
+            dirOnHitGround = new Vector2(-7.6f * oneSixteth, 0.0f);
+            dirModOnHitGround = new Vector2(0.55f * oneSixteth, 0.0f);
+            dirMinOnHitGround = new Vector2(-0.01f * oneSixteth, 0.0f);
+            dirOnHitAir = new Vector2(-7.6f * oneSixteth, 17.0f * oneSixteth);
             dirModOnHitAir = new Vector2(0.0f, -0.7f * oneSixteth);
             dirMinOnHitAir = Vector2.Zero;
             hitStateStanding = HitstunStates.CmnHurtStandMedium;
@@ -882,10 +894,10 @@ namespace BooBoo.Battle
             HKDOnHit = 0;
             HKDInvulTimerOnHit = -1;
             crumpleOnHit = false;
-            dirOnHitGround = new Vector2(-2.6f * oneSixteth, 0.0f);
-            dirModOnHitGround = Vector2.Zero;
-            dirMinOnHitGround = Vector2.Zero;
-            dirOnHitAir = new Vector2(-2.6f * oneSixteth, 22.0f * oneSixteth);
+            dirOnHitGround = new Vector2(-9.8f * oneSixteth, 0.0f);
+            dirModOnHitGround = new Vector2(0.68f * oneSixteth, 0.0f);
+            dirMinOnHitGround = new Vector2(-0.01f * oneSixteth, 0.0f);
+            dirOnHitAir = new Vector2(-9.8f * oneSixteth, 22.0f * oneSixteth);
             dirModOnHitAir = new Vector2(0.0f, -0.7f * oneSixteth);
             dirMinOnHitAir = Vector2.Zero;
             hitStateStanding = HitstunStates.CmnHurtStandHeavy;
