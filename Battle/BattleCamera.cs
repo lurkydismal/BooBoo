@@ -74,10 +74,9 @@ namespace BooBoo.Battle
                         desiredPos.X = (BattleStage.stage.stageWidth - 6.0f) * MathF.Sign(desiredPos.X);
 
                     Vector3 final = Vector3.Lerp(position, desiredPos, camMoveSpeed);
+                    target = final;
                     final.Z = 8.0f + autoZoom;
-
                     position = final;
-                    target = desiredPos;
                     break;
             }
         }
