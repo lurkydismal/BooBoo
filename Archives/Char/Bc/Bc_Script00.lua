@@ -11,8 +11,7 @@ function MatchInit(actor)
 
 function SetPersonaMove(state, xOffset, yOffset, xMaxDist, yMaxDist)
 	if izActive == false or math.abs(yu:GetDistanceFrom(iz).X) >= xMaxDist or math.abs(yu:GetDistanceFrom(iz).Y) >= yMaxDist then
-		iz.position.X = yu.position.X + xOffset
-		iz.position.Y = yu.position.Y + yOffset
+		iz.position = Vector3(yu.position.X + xOffset, yu.position.Y + yOffset, 0.0)
 		end
 	iz:EnterState(state)
 	izActive = true
@@ -97,13 +96,13 @@ function NmlAtk5A3rd_Update(actor, frame)
 
 function NmlAtk5C_Update(actor, frame)
 	if frame == 1 then
-		SetPersonaMove("Iz_Atk5C", 0.6, 0.0, 5.0, 0.01)
+		SetPersonaMove("Iz_Atk5C", -0.4, 0.0, 5.0, 0.01)
 		end
 	end
 	
 function Iz_Atk5C_Update(actor, frame)
 	if frame == 1 then
-		actor:SetVelocity(8.0, 0.0)
+		actor:SetVelocity(10.0, 0.0)
 		actor:SetVelocityMod(-0.35, 0.0)
 	elseif frame == 3 then
 		actor:SetVelocity(0.0, 0.0)
@@ -117,4 +116,19 @@ function Iz_Atk5C_End(actor)
 	actor.animBlending = false
 	actor:EnterState("Iz_Wait", false)
 	izActive = false
+	end
+
+function CrossSlashC_Update(actor, frame)
+	if frame == 2 then
+		actor:SpawnEffect("bc430_eff", 0.0, 0.0)
+	
+	elseif frame == 27 or frame == 28 then
+		actor.position = Vector3(actor.position.X + 0.6, actor.position.Y, actor.position.Z)
+	elseif frame == 56 or frame == 57 or frame == 58 then
+		actor.position = Vector3(actor.position.X - 0.4, actor.position.Y, actor.position.Z)
+		end
+	end
+
+function CrossSlashC_Hit(actor, hit)
+	actor:SetInvincibility(true)
 	end

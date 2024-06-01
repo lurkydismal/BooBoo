@@ -30,8 +30,11 @@ namespace BooBoo.Battle
         _421,
         _66,
         _44,
+        _236236,
+        _214214
     }
 
+    [JsonConverter(typeof(StringEnumConverter))]
     [Flags]
     public enum ButtonType
     {
@@ -46,6 +49,16 @@ namespace BooBoo.Battle
 
         Charge = 0b_0001_0000_0000_0000,
         Release = 0b_0010_0000_0000_0000,
+
+        AB = A | B,
+        ABC = AB | C,
+        ABCD = ABC | D,
+        BC = B | C,
+        BCD = BC | D,
+        AC = A | C,
+        ACD = AC | D,
+        CD = C | D,
+        BD = B | D,
     }
 
     [JsonConverter(typeof(StringEnumConverter))]

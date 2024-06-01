@@ -10,10 +10,11 @@
   "PalCount": 1,
   "Palettes": [
     {
-      "ColorsInPal": 2,
+      "ColorsInPal": 3,
       "Pals": [
         "Palettes/Color00/YuPal.png",
-        "Palettes/Color00/IzPal.png"
+        "Palettes/Color00/IzPal.png",
+        "Palettes/Color00/ZioPal.png"
       ]
     }
   ],

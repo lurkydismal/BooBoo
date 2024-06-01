@@ -381,7 +381,7 @@ namespace BooBoo.Battle
                     }
                     HKDBeginInvulTime--;
                     if (HKDBeginInvulTime == 0)
-                        collisionFlags |= CollisionFlags.Invincible;
+                        collisionFlags &= CollisionFlags.Invincible;
                     if (frameActiveTime >= frameLength)
                     {
                         frameActiveTime = 0;
@@ -691,37 +691,37 @@ namespace BooBoo.Battle
                         {
                             Rlgl.Color4ub(multColor.R, multColor.G, multColor.B, multColor.A);
                             Rlgl.TexCoord2f(0.0f, 0.0f);
-                            Rlgl.Vertex3f(0.0f, 0.0f, renderOffset);
+                            Rlgl.Vertex3f(0.0f, 0.0f, 0.0f);
 
                             Rlgl.Color4ub(multColor.R, multColor.G, multColor.B, multColor.A);
                             Rlgl.TexCoord2f(0.0f, 1.0f);
-                            Rlgl.Vertex3f(0.0f, -sprite.height  * 0.01f, renderOffset);
+                            Rlgl.Vertex3f(0.0f, -sprite.height  * 0.01f, 0.0f);
 
                             Rlgl.Color4ub(multColor.R, multColor.G, multColor.B, multColor.A);
                             Rlgl.TexCoord2f(1.0f, 1.0f);
-                            Rlgl.Vertex3f(sprite.width * 0.01f, -sprite.height * 0.01f, renderOffset);
+                            Rlgl.Vertex3f(sprite.width * 0.01f, -sprite.height * 0.01f, 0.0f);
 
                             Rlgl.Color4ub(multColor.R, multColor.G, multColor.B, multColor.A);
                             Rlgl.TexCoord2f(1.0f, 0.0f);
-                            Rlgl.Vertex3f(sprite.width * 0.01f, 0.0f, renderOffset);
+                            Rlgl.Vertex3f(sprite.width * 0.01f, 0.0f, 0.0f);
                         }
                         else
                         {
                             Rlgl.Color4ub(multColor.R, multColor.G, multColor.B, multColor.A);
                             Rlgl.TexCoord2f(uv.uv.X / sprite.width, uv.uv.Y / sprite.height);
-                            Rlgl.Vertex3f(0.0f, 0.0f, renderOffset);
+                            Rlgl.Vertex3f(0.0f, 0.0f, 0.0f);
 
                             Rlgl.Color4ub(multColor.R, multColor.G, multColor.B, multColor.A);
                             Rlgl.TexCoord2f(uv.uv.X / sprite.width, (uv.uv.Y + uv.uv.W) / sprite.height);
-                            Rlgl.Vertex3f(0.0f, -uv.uv.W * 0.01f, renderOffset);
+                            Rlgl.Vertex3f(0.0f, -uv.uv.W * 0.01f, 0.0f);
 
                             Rlgl.Color4ub(multColor.R, multColor.G, multColor.B, multColor.A);
                             Rlgl.TexCoord2f((uv.uv.X + uv.uv.Z) / sprite.width, (uv.uv.Y + uv.uv.W) / sprite.height);
-                            Rlgl.Vertex3f(uv.uv.Z * 0.01f, -uv.uv.W * 0.01f, renderOffset);
+                            Rlgl.Vertex3f(uv.uv.Z * 0.01f, -uv.uv.W * 0.01f, 0.0f);
 
                             Rlgl.Color4ub(multColor.R, multColor.G, multColor.B, multColor.A);
                             Rlgl.TexCoord2f((uv.uv.X + uv.uv.Z) / sprite.width, uv.uv.Y / sprite.height);
-                            Rlgl.Vertex3f(uv.uv.Z * 0.01f, 0.0f, renderOffset);
+                            Rlgl.Vertex3f(uv.uv.Z * 0.01f, 0.0f, 0.0f);
                         }
 
                         Rlgl.End();
@@ -746,10 +746,10 @@ namespace BooBoo.Battle
         public void EnterState(string state, bool callEnd = true)
         {
             //Remove invincibility
-            collisionFlags |= ~CollisionFlags.Invincible;
-            collisionFlags |= ~CollisionFlags.InvulLow;
-            collisionFlags |= ~CollisionFlags.InvulHigh;
-            collisionFlags |= ~CollisionFlags.InvulProjectile;
+            collisionFlags &= ~CollisionFlags.Invincible;
+            collisionFlags &= ~CollisionFlags.InvulLow;
+            collisionFlags &= ~CollisionFlags.InvulHigh;
+            collisionFlags &= ~CollisionFlags.InvulProjectile;
             if (callEnd)
                 CallLuaFunc(curState + "_End", this);
             curState = state;
@@ -791,8 +791,10 @@ namespace BooBoo.Battle
                                     continue;
                                 if (sta.CancelType != CancelType.Whenever)
                                     continue;
-                                cancableStates.Add(sta);
+                                hitOrBlockCancles.Add(sta.Name);
                             }
+                            break;
+                        case StateType.Super:
                             break;
                     }
                 foreach (string sta in cancel.WhiffCancels)
@@ -818,9 +820,9 @@ namespace BooBoo.Battle
             actor.position.Y = position.Y + offsetY;
             actor.position.Z = position.Z;
             actor.dir = dir;
-            children.Add(actor);
             actor.parent = this;
             actor.player = player;
+            children.Add(actor);
             gameState.actors.Add(actor);
             return actor;
         }
@@ -846,6 +848,11 @@ namespace BooBoo.Battle
         {
             return collisionFlags.HasFlag(CollisionFlags.DistanceWall) && 
                 MathF.Abs(opponentDist.X + wallPushboxWidth * MathF.Sign(position.X)) > stage.maxPlayerDistance;
+        }
+
+        public void SetInvincibility(bool b)
+        {
+            collisionFlags &= b ? CollisionFlags.Invincible : ~CollisionFlags.Invincible;
         }
 
         public bool InvulToAttrib(AttackHitAttribute attribute)

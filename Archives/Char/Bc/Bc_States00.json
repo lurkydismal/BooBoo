@@ -151,7 +151,15 @@
 		}
 	],
 	"SpecialStates": [],
-	"SuperStates": [],
+	"SuperStates": [
+		{
+			"Name": "CrossSlashC",
+			"Input": "_214214",
+			"Button": "C",
+			"Priority": 5,
+			"CounterType": "Normal"
+		}
+	],
 	"HitstunLoopData": {
 		"StaggerLoopPos": 0,
 		"LaunchLoopPos": 1,

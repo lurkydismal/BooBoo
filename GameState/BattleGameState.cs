@@ -55,6 +55,8 @@ namespace BooBoo.GameState
             renderTexRect = new Rectangle(0, 0, 1280, -720);
             stage = new BattleStage("Debug");
 
+            DPArc commonArchive = FileHelper.LoadArchive("Char/Cmn.dparc");
+
             for (int i = 0; i < charIds.Length; i++)
             {
                 Console.WriteLine("Loading char " + i);
@@ -78,6 +80,8 @@ namespace BooBoo.GameState
                     Raylib.SetTextureFilter(palTextures[i2], TextureFilter.Point);
                 }
                 Lua luaCode = new Lua();
+                luaCode.LoadCLRPackage();
+                luaCode.DoString(commonArchive.GetFile("CmnScript.lua").DataAsString());
                 luaCode.DoString(charArc.GetFile(charLoad.Scripts[0]).DataAsString());
                 BattleActor actor = new BattleActor(yuSprAn, charList, inputs[i], luaCode, "CmnStand", charLoad.RenderMode, charSprite, palTextures);
                 actor.SetEffects(effects);
@@ -87,6 +91,10 @@ namespace BooBoo.GameState
                 if(i == 0 && charIds[1] == charIds[0])
                 {
                     i++;
+                    luaCode = new Lua();
+                    luaCode.LoadCLRPackage();
+                    luaCode.DoString(commonArchive.GetFile("CmnScript.lua").DataAsString());
+                    luaCode.DoString(charArc.GetFile(charLoad.Scripts[0]).DataAsString());
                     actor = new BattleActor(yuSprAn, charList, inputs[i], luaCode, "CmnStand", charLoad.RenderMode, charSprite, palTextures);
                     actor.SetEffects(effects);
                     actors.Add(actor);
@@ -130,7 +138,7 @@ namespace BooBoo.GameState
 
             //Draw characters first for shadows and stuff later
             Raylib.BeginTextureMode(charTex);
-            Raylib.ClearBackground(new Color(0, 0, 0, 0));
+            Raylib.ClearBackground(Color.Blank);
             Raylib.BeginMode3D(BattleCamera.activeCamera);
             foreach (BattleActor actor in actorsToDraw)
                 actor.Draw();
@@ -141,7 +149,7 @@ namespace BooBoo.GameState
             if (drawBoxes)
             {
                 Raylib.BeginTextureMode(charBoxTex);
-                Raylib.ClearBackground(new Color(0, 0, 0, 0));
+                Raylib.ClearBackground(Color.Blank);
                 Raylib.BeginMode3D(BattleCamera.activeCamera);
                 foreach (BattleActor actor in actorsToDraw)
                 {
@@ -163,7 +171,7 @@ namespace BooBoo.GameState
 
             //Draw UI 1
             Raylib.BeginTextureMode(uiTex1);
-            Raylib.ClearBackground(new Color(0, 0, 0, 0));
+            Raylib.ClearBackground(Color.Blank);
             ui.DrawLayer1();
             Raylib.EndTextureMode();
 
