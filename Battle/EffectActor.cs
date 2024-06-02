@@ -157,6 +157,14 @@ namespace BooBoo.Battle
         {
             Vector3 screenScale = twoD ? new Vector3(Raylib.GetScreenWidth() / 1280.0f, Raylib.GetScreenHeight() / 720.0f, 0.0f) : Vector3.One;
 
+            if(layer.palNum >= 0)
+            {
+                Shader shader = (GameStateBase.gameState as BattleGameState).spriteShader;
+                int shaderLoc = (GameStateBase.gameState as BattleGameState).sprShaderPalLoc;
+                Raylib.SetShaderValueTexture(shader, shaderLoc, parent.palTextures[layer.palNum]);
+                Raylib.BeginShaderMode(shader);
+            }
+
             Rlgl.DisableBackfaceCulling();
             Rlgl.PushMatrix();
             Rlgl.Translatef((layer.position.X + pos.X) * screenScale.X, (layer.position.Y + pos.Y) * screenScale.Y, layer.position.Z);
@@ -165,19 +173,12 @@ namespace BooBoo.Battle
             Rlgl.Rotatef(layer.rotation.Z, 0.0f, 0.0f, 0.1f);
             Rlgl.Scalef(layer.scale.X * scale.X, layer.scale.Y * scale.Y, layer.scale.Z);
 
-            if(layer.palNum >= 0)
-            {
-                Shader shader = (GameStateBase.gameState as BattleGameState).spriteShader;
-                int shaderLoc = (GameStateBase.gameState as BattleGameState).sprShaderPalLoc;
-                Raylib.BeginShaderMode(shader);
-                Raylib.SetShaderValueTexture(shader, shaderLoc, parent.palTextures[layer.palNum]);
-            }
-
-            Rlgl.Color4f((layer.colMult[0] + layer.colAdd[0]) / 255.0f, (layer.colMult[1] + layer.colAdd[1]) / 255.0f,
-                (layer.colMult[2] + layer.colAdd[2]) / 255.0f, (layer.colMult[3] + layer.colAdd[3]) / 255.0f);
 
             if (layer.additive)
                 Raylib.BeginBlendMode(BlendMode.Additive);
+
+            Rlgl.Color4f((layer.colMult[0] + layer.colAdd[0]) / 255.0f, (layer.colMult[1] + layer.colAdd[1]) / 255.0f,
+                (layer.colMult[2] + layer.colAdd[2]) / 255.0f, (layer.colMult[3] + layer.colAdd[3]) / 255.0f);
 
             Vector2 texSize;
             if (prmAn.textures.ContainsKey(layer.texId))

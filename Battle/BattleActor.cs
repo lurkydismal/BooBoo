@@ -176,7 +176,7 @@ namespace BooBoo.Battle
                     //hurt actor code
                     actor.curHealth -= damage;
                     actor.hitstopTime = hitstopOnHit;
-                    actor.hitstunTime = hitstopOnHit;
+                    actor.hitstunTime = hitstunOnHit;
                     actor.HKDTime = HKDOnHit;
                     actor.HKDBeginInvulTime = HKDInvulTimerOnHit;
                     if (actor.curStatePos == StatePosition.Aerial)
@@ -839,6 +839,12 @@ namespace BooBoo.Battle
             velocityMod.Y = y * oneSixteth;
         }
 
+        public void AddPosition(float x, float y)
+        {
+            position.X += x * (int)dir;
+            position.Y += y;
+        }
+
         public bool TouchingWall()
         {
             return collisionFlags.HasFlag(CollisionFlags.StageWall) && MathF.Abs(position.X + wallPushboxWidth * MathF.Sign(position.X)) > stage.stageWidth;
@@ -852,7 +858,7 @@ namespace BooBoo.Battle
 
         public void SetInvincibility(bool b)
         {
-            collisionFlags &= b ? CollisionFlags.Invincible : ~CollisionFlags.Invincible;
+            collisionFlags |= b ? CollisionFlags.Invincible : ~CollisionFlags.Invincible;
         }
 
         public bool InvulToAttrib(AttackHitAttribute attribute)
@@ -878,7 +884,7 @@ namespace BooBoo.Battle
             RefreshHit();
             damage = 20;
             hitstopOnHit = 7;
-            hitstunOnHit = 15;
+            hitstunOnHit = 8;
             HKDOnHit = 0;
             HKDInvulTimerOnHit = -1;
             crumpleOnHit = false;
@@ -899,7 +905,7 @@ namespace BooBoo.Battle
             RefreshHit();
             damage = 30;
             hitstopOnHit = 9;
-            hitstunOnHit = 20;
+            hitstunOnHit = 10;
             HKDOnHit = 0;
             HKDInvulTimerOnHit = -1;
             crumpleOnHit = false;
@@ -920,7 +926,7 @@ namespace BooBoo.Battle
             RefreshHit();
             damage = 40;
             hitstopOnHit = 12;
-            hitstunOnHit = 20;
+            hitstunOnHit = 14;
             HKDOnHit = 0;
             HKDInvulTimerOnHit = -1;
             crumpleOnHit = false;
