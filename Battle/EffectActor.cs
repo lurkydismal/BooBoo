@@ -167,10 +167,10 @@ namespace BooBoo.Battle
 
             Rlgl.DisableBackfaceCulling();
             Rlgl.PushMatrix();
-            Rlgl.Translatef((layer.position.X + pos.X) * screenScale.X, (layer.position.Y + pos.Y) * screenScale.Y, layer.position.Z);
-            Rlgl.Rotatef(layer.rotation.Y, 0.0f, 0.1f, 0.0f);
-            Rlgl.Rotatef(layer.rotation.X, 0.1f, 0.0f, 0.0f);
-            Rlgl.Rotatef(layer.rotation.Z, 0.0f, 0.0f, 0.1f);
+            Rlgl.Translatef((layer.position.X * (int)parent.dir + pos.X) * screenScale.X, (layer.position.Y + pos.Y) * screenScale.Y, layer.position.Z);
+            Rlgl.Rotatef(layer.rotation.Y * (int)parent.dir, 0.0f, 0.1f, 0.0f);
+            Rlgl.Rotatef(layer.rotation.X * (int)parent.dir, 0.1f, 0.0f, 0.0f);
+            Rlgl.Rotatef(layer.rotation.Z * (int)parent.dir, 0.0f, 0.0f, 0.1f);
             Rlgl.Scalef(layer.scale.X * scale.X, layer.scale.Y * scale.Y, layer.scale.Z);
 
 
