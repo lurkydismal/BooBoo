@@ -11,7 +11,7 @@ using NLua;
 
 namespace BooBoo.Battle
 {
-    internal class BattleActor
+    internal class BattleActor : IRenderableObject
     {
         public Vector3 position = Vector3.Zero;
         public Vector3 velocity = Vector3.Zero;
@@ -19,6 +19,7 @@ namespace BooBoo.Battle
         public Vector3 velocityMin = Vector3.Zero; //will stop applying mod on vel if it reaches this threshold
         public Vector3 rotation = Vector3.Zero;
         public Vector3 scale = Vector3.One;
+        int IRenderableObject.renderPriority { get { return renderPriority; } set { renderPriority = value; } }
         public int renderPriority = 0;
         public Direction dir = Direction.Left;
         public int posSign { get { return MathF.Sign(position.X); } }
@@ -741,10 +742,6 @@ namespace BooBoo.Battle
 
                 Raylib.EndShaderMode();
             }
-
-            EffectActor[] drawEffects = effectsActive.Values.OrderBy(eff => eff.renderPriority).ToArray();
-            foreach (EffectActor eff in drawEffects)
-                eff.Draw();
         }
 
         public void Draw2DEffects()

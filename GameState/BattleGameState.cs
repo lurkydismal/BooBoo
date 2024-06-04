@@ -16,7 +16,6 @@ namespace BooBoo.GameState
     internal class BattleGameState : GameStateBase
     {
         public List<BattleActor> actors { get; private set; } = new List<BattleActor>();
-        List<BattleActor> actorsToDraw = new List<BattleActor>();
         public BattleActor player1, player2;
         public string[] charIds;
         public InputHandler[] inputs;
@@ -133,10 +132,7 @@ namespace BooBoo.GameState
         public override void Update()
         {
             foreach(BattleActor actor in actors)
-            {
                 actor.Update();
-                actorsToDraw.Add(actor);
-            }
 
             if (superFreeze)
             {
@@ -155,7 +151,14 @@ namespace BooBoo.GameState
 
         public override void Draw()
         {
-            actorsToDraw = actorsToDraw.OrderBy(actor => actor.renderPriority).ToList();
+            List<IRenderableObject> actorsToDraw = new List<IRenderableObject>();
+            foreach(BattleActor actor in actors)
+            {
+                actorsToDraw.Add(actor);
+                foreach (EffectActor eff in actor.effectsActive.Values)
+                    actorsToDraw.Add(eff);
+            }
+            actorsToDraw = actorsToDraw.OrderBy(obj => obj.renderPriority).ToList();
 
             Raylib.BeginTextureMode(bgTex);
             Raylib.ClearBackground(Color.Blank);
@@ -186,7 +189,7 @@ namespace BooBoo.GameState
             Raylib.DrawTextureRec(bgTex.Texture, new Rectangle(0, 0, bgTex.Texture.Width, -bgTex.Texture.Height), Vector2.Zero, Color.White);
             ui.DrawLayer1();
             Raylib.BeginMode3D(BattleCamera.activeCamera);
-            foreach (BattleActor actor in actorsToDraw)
+            foreach (IRenderableObject actor in actorsToDraw)
                 actor.Draw();
             Raylib.EndMode3D();
             actorsToDraw.Clear();

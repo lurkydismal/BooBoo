@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Numerics;
 using BooBoo.GameState;
+using BooBoo.Util;
 using BlakieLibSharp;
 using Raylib_cs;
 using static BlakieLibSharp.PrmAn;
@@ -9,7 +9,7 @@ using static BlakieLibSharp.PrmAn;
 namespace BooBoo.Battle
 {
     //this class is basically just ui drawer on drugs
-    internal class EffectActor
+    internal class EffectActor : IRenderableObject
     {
         public Vector3 position = Vector3.Zero;
         public Vector3 rotation = Vector3.Zero;
@@ -29,7 +29,8 @@ namespace BooBoo.Battle
         int barEndVal = 1;
         int barCurVal = 0;
 
-        public int renderPriority = 0;
+        int IRenderableObject.renderPriority { get { return renderPriority; } set { renderPriority = value; } }
+        public int renderPriority = 1;
 
         public static EffectActor BeginAnim(BattleActor parent, PrmAn prmAn, bool UI, string anim, bool loop)
         {
