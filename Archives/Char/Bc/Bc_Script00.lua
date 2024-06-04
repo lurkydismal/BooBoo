@@ -13,9 +13,9 @@ function SetPersonaMove(state, xOffset, yOffset, xMaxDist, yMaxDist)
 	if izActive == false or math.abs(yu:GetDistanceFrom(iz).X) >= xMaxDist or math.abs(yu:GetDistanceFrom(iz).Y) >= yMaxDist then
 		iz.position = Vector3(yu.position.X + xOffset, yu.position.Y + yOffset, 0.0)
 		end
+	iz:FaceActor(yu.opponent)
 	iz:EnterState(state)
 	izActive = true
-	iz:FaceActor(yu.opponent)
 	end
 
 function Iz_Init(actor)
@@ -193,11 +193,8 @@ function Iz_CrossSlashC_Update(actor, frame)
 		end
 	end
 
-function Iz_CrossSlashC_Tick(actor)
-	if actor.position.Y <= 0.0 then
-		actor.position = Vector3(actor.position.X, 0.0, 0.0)
-		actor.frameActiveTime = 10000
-		end
+function Iz_CrossSlashC_Land(actor)
+	actor.frameActiveTime = 10000
 	end
 
 function Iz_CrossSlashC_End(actor)
