@@ -15,9 +15,11 @@ function SetPersonaMove(state, xOffset, yOffset, xMaxDist, yMaxDist)
 		end
 	iz:EnterState(state)
 	izActive = true
+	iz:FaceActor(yu.opponent)
 	end
 
 function Iz_Init(actor)
+	actor.renderPriority = -1
 	actor.curPalNum = 1
 	actor:EnterState("Iz_Wait")
 	end
@@ -78,14 +80,17 @@ function CmnLand_Init(actor)
 
 function NmlAtk5A1st_Init(actor)
 	actor:AttackMacroWeak();
+	actor:FaceActor(actor.opponent)
 	end
 
 function NmlAtk5A2nd_Init(actor)
 	actor:AttackMacroMedium();
+	actor:FaceActor(actor.opponent)
 	end
 
 function NmlAtk5A3rd_Init(actor)
 	actor:AttackMacroHeavy();
+	actor:FaceActor(actor.opponent)
 	end
 
 function NmlAtk5A3rd_Update(actor, frame)
@@ -94,12 +99,20 @@ function NmlAtk5A3rd_Update(actor, frame)
 		end
 	end
 
+function NmlAtk5C_Init(actor)
+	actor:FaceActor(actor.opponent)
+	end
+
 function NmlAtk5C_Update(actor, frame)
 	if frame == 1 then
 		SetPersonaMove("Iz_Atk5C", -0.4, 0.0, 5.0, 0.01)
 		end
 	end
-	
+
+function Iz_Atk5C_Init(actor)
+	actor:AttackMacroHeavy();
+	end
+
 function Iz_Atk5C_Update(actor, frame)
 	if frame == 1 then
 		actor:SetVelocity(10.0, 0.0)
@@ -112,23 +125,82 @@ function Iz_Atk5C_Update(actor, frame)
 		end
 	end
 
+function Iz_Atk5C_Hit(actor, hit)
+	yu:AddHitOrBlockCancels()
+	end
+
 function Iz_Atk5C_End(actor)
 	actor.animBlending = false
 	actor:EnterState("Iz_Wait", false)
 	izActive = false
 	end
 
+local crossSlashHitTarget = nil
+
+function CrossSlashC_Init(actor)
+	actor:AttackMacroHeavy()
+	actor.hitstopOnHit = 0
+	actor.hitstunOnHit = 9999
+	actor.hitStateStanding = luanet.enum(HitstunStates, "CmnHurtGutHeavy")
+	actor.hitStateCrouching = luanet.enum(HitstunStates, "CmnHurtGutHeavy")
+	actor.hitStateAerial = luanet.enum(HitstunStates, "CmnHurtGutHeavy")
+	actor.dirOnHitGround = HitVector(16.0, 0.0)
+	actor.dirOnHitAir = actor.dirOnHitGround
+	actor.dirModOnHitAir = actor.dirModOnHitGround
+	actor.dirMinOnHitAir = actor.dirMinOnHitGround
+	end
+
 function CrossSlashC_Update(actor, frame)
 	if frame == 2 then
 		actor:SpawnEffect("bc430_eff", 0.0, 0.0)
-	
+		BeginSuperFreeze(80, actor, 1.7, 2.6)
+	elseif frame == 26 then
+		actor:SpawnEffect("CrossSlash", 0.0, 0.0)
 	elseif frame == 27 or frame == 28 then
-		actor.position = Vector3(actor.position.X + 0.6, actor.position.Y, actor.position.Z)
+		actor:AddPosition(0.6, 0.0)
 	elseif frame == 56 or frame == 57 or frame == 58 then
-		actor.position = Vector3(actor.position.X - 0.4, actor.position.Y, actor.position.Z)
+		actor:AddPosition(-0.4, 0.0)
+	elseif frame == 32 and crossSlashHitTarget ~= nil then
+		SetPersonaMove("Iz_CrossSlashC", 0.0, 0.0, 0.0, 0.0)
 		end
 	end
 
 function CrossSlashC_Hit(actor, hit)
 	actor:SetInvincibility(true)
+	hit.position = Vector3(actor.position.X + (0.3 * Sign(actor:GetDistanceFrom(actor.opponent).X)), 0.0, 0.0)
+	crossSlashHitTarget = hit
+	end
+
+function CrossSlashC_End(actor)
+	crossSlashHitTarget = nil
+	end
+
+function Iz_CrossSlashC_Init(actor)
+	actor.position = crossSlashHitTarget.position
+	actor:AddPosition(0.0, 10.0)
+	actor:AttackMacroHeavy()
+	actor.hitStateStanding = luanet.enum(HitstunStates, "CmnHurtStagger")
+	actor.dirOnHitGround = Vector3(0.0, 0.0, 0.0)
+	actor.dirModOnHitGround = Vector3(0.0, 0.0, 0.0)
+	actor.dirMinOnHitGround = Vector3(0.0, 0.0, 0.0)
+	actor.crumpleOnHit = true
+	actor.HKDOnHit = 50
+	end
+
+function Iz_CrossSlashC_Update(actor, frame)
+	if frame == 11 then
+		actor:SetVelocity(0.0, -50.0)
+		end
+	end
+
+function Iz_CrossSlashC_Tick(actor)
+	if actor.position.Y <= 0.0 then
+		actor.position = Vector3(actor.position.X, 0.0, 0.0)
+		actor.frameActiveTime = 10000
+		end
+	end
+
+function Iz_CrossSlashC_End(actor)
+	actor:EnterState("Iz_Wait", false)
+	izActive = false
 	end

@@ -1,5 +1,6 @@
 import("System.Numerics")
 import("BooBoo", "BooBoo.Battle")
+import("BooBoo", "BooBoo.GameState")
 import("BooBoo", "BooBoo.Util")
 
 local oneSixteth <const> = 1/60
@@ -16,4 +17,12 @@ function Sign(x)
 
 function HitVector(x, y)
 	return Vector2(-x * oneSixteth, y * oneSixteth)
+	end
+
+function BeginSuperFreeze(time, actor, effXPos, effYPos)
+	BattleGameState.BeginSuperFreeze(time, actor)
+	actor:SpawnEffect("SuperFreeze", effXPos, effYPos)
+	actor:SetEffectRenderPriority("SuperFreeze", 15)
+	actor:PlaySound("GlassBreakFaded")
+	actor:PlaySound("SuperFlash")
 	end
