@@ -23,12 +23,19 @@ namespace BooBoo.Util
             foreach(ArchiveFile file in files)
                 if (file.fileName.EndsWith(".wav") || file.fileName.EndsWith(".ogg"))
                 {
-                    string fileName = file.fileName.Replace(folderToCheck, string.Empty);
+                    string fileName = file.fileName.Replace(folderToCheck + "/", string.Empty);
                     fileName = fileName.Substring(0, fileName.LastIndexOf('.'));
-                    Sound sound = Raylib.LoadSoundFromWave(Raylib.LoadWaveFromMemory(file.fileName.Substring(fileName.Length), file.data));
+                    Sound sound = Raylib.LoadSoundFromWave(Raylib.LoadWaveFromMemory(file.fileName.Substring(file.fileName.IndexOf(fileName) + fileName.Length), 
+                        file.data));
                     rtrn.sounds.Add(fileName, sound);
                 }
             return rtrn;
+        }
+
+        public void Combine(AudioPlayer other)
+        {
+            foreach(KeyValuePair<string, Sound> pair in other.sounds)
+                sounds.TryAdd(pair.Key, pair.Value);
         }
 
         public virtual void Play(string sound)
