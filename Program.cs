@@ -13,7 +13,7 @@ namespace BooBoo
             Console.WriteLine("Hello, World!");
 
             Window.InitWindow();
-
+            Raylib.InitAudioDevice();
             SystemManager.InitSystem();
 
             //if (args.Length > 0 && args[0] == "-Battle")
@@ -50,6 +50,7 @@ namespace BooBoo
                     GameStateBase.switchingGameState = false;
             }
 
+            Raylib.CloseAudioDevice();
             Raylib.CloseWindow();
         }
     }
