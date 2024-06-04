@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using System.Linq;
 using BlakieLibSharp;
 using BooBoo.GameState;
 using BooBoo.Util;
@@ -18,7 +19,7 @@ namespace BooBoo.Battle
         public Vector3 velocityMin = Vector3.Zero; //will stop applying mod on vel if it reaches this threshold
         public Vector3 rotation = Vector3.Zero;
         public Vector3 scale = Vector3.One;
-        public float renderOffset = 0.001f;
+        public int renderPriority = 0;
         public Direction dir = Direction.Left;
         public int posSign { get { return MathF.Sign(position.X); } }
 
@@ -47,6 +48,8 @@ namespace BooBoo.Battle
         public SprAn.SprAnState curAnim {  get { return sprAn.GetState(curAnimName); } }
         public int curAnimFrame = 0;
         public SprAn.SprAnFrame curFrame { get { return sprAn.GetFrame(curAnimName, curAnimFrame); } }
+        public AudioPlayer soundEffects { get; private set; }
+        public UniqueAudioPlayer voiceLines { get; private set; }
 
         //Hurt values
         public int hitstopTime = 0;
@@ -108,6 +111,7 @@ namespace BooBoo.Battle
 
         public int frameActiveTime = -1;
         public int frameLength { get { return curFrame.frameLength; } }
+        public bool ignoreFreeze = false;
 
         List<string> hitCancels = new List<string>();
         List<string> hitOrBlockCancles = new List<string>();
@@ -159,6 +163,9 @@ namespace BooBoo.Battle
 
         public void Update()
         {
+            if (!ignoreFreeze && gameState.superFreeze)
+                goto BufferUpdate;
+
             //update effects
             foreach (EffectActor eff in effectsActive.Values)
                 eff.Update();
@@ -207,14 +214,13 @@ namespace BooBoo.Battle
                             actor.EnterState(Enum.GetName(typeof(HitstunStates), hitStateAerial));
                             break;
                     }
+                    actor.FaceActor(this);
 
                     actor.willBeHit = false;
 
                     //hit code
                     hitstopTime = hitstopOnHit;
-                    foreach(string state in hitOrBlockCancles)
-                        if(states.HasState(state))
-                            cancableStates.Add(states.GetState(state));
+                    AddHitOrBlockCancels();
                     actorsHit.Add(actor);
                     CallLuaFunc(curState + "_Hit", this, actor);
                 }
@@ -233,7 +239,10 @@ namespace BooBoo.Battle
                     CallLuaFunc(curState + "_Tick", this);
                     if (states.HasState(curState) && states[curState].StateCanTurn)
                         if (MathF.Sign(opponentDist.X) == -(int)dir)
+                        {
                             EnterState(states[curState].TurnState);
+                            RemoveCancel(states[curState].NextState);
+                        }
 
                     if (frameActiveTime >= frameLength)
                     {
@@ -660,7 +669,7 @@ namespace BooBoo.Battle
                 Raylib.SetShaderValueTexture(spriteShader, gameState.sprShaderPalLoc, palTextures[curPalNum]);
                 SprAn.SprAnFrame frame;
                 if (animBlending && curAnimFrame + 1 < curAnim.frameCount)
-                    frame = curFrame.BlendFrames(curAnim.frames[curAnimFrame + 1], frameActiveTime / frameLength);
+                    frame = curFrame.BlendFrames(curAnim.frames[curAnimFrame + 1], (float)frameActiveTime / (float)frameLength);
                 else
                     frame = curFrame;
 
@@ -733,7 +742,8 @@ namespace BooBoo.Battle
                 Raylib.EndShaderMode();
             }
 
-            foreach (EffectActor eff in effectsActive.Values)
+            EffectActor[] drawEffects = effectsActive.Values.OrderBy(eff => eff.renderPriority).ToArray();
+            foreach (EffectActor eff in drawEffects)
                 eff.Draw();
         }
 
@@ -962,16 +972,27 @@ namespace BooBoo.Battle
             actor.dir = dir;
             actor.SetFlags(flags);
             if (flags.HasFlag(EffectActor.EffectFlags.FollowActorPos))
-                actor.position = new Vector3(offsetX, offsetY, 0.0f);
+                actor.position = new Vector3(offsetX * (int)dir, offsetY, 0.0f);
             else
                 actor.position = position + new Vector3(offsetX, offsetY, 0.0f);
             effectsActive.Add(animName, actor);
             return actor;
         }
 
+        public void SetEffectRenderPriority(string eff, int priority)
+        {
+            if (effectsActive.ContainsKey(eff))
+                effectsActive[eff].renderPriority = priority;
+        }
+
         public void QueueDeleteEffect(string eff)
         {
             effectsToDelete.Add(eff);
+        }
+
+        public void PlaySound(string sound)
+        {
+            soundEffects.Play(sound);
         }
 
         public void CallLuaFunc(string function, params object[] args)
@@ -990,6 +1011,13 @@ namespace BooBoo.Battle
                 else if (rtrn == 3 || rtrn == 6 || rtrn == 9)
                     rtrn -= 2;
             return rtrn;
+        }
+
+        public void AddHitOrBlockCancels()
+        {
+            foreach (string state in hitOrBlockCancles)
+                if (states.HasState(state))
+                    cancableStates.Add(states.GetState(state));
         }
 
         public void RemoveCancel(string state)
@@ -1026,6 +1054,18 @@ namespace BooBoo.Battle
         {
             if (this.effects == null)
                 this.effects = effects;
+        }
+
+        public void SetSounds(AudioPlayer sounds)
+        {
+            if(soundEffects == null)
+                soundEffects = sounds;
+        }
+
+        public void SetVoices(UniqueAudioPlayer voices)
+        {
+            if (voiceLines == null)
+                voiceLines = voices;
         }
 
         public Vector3 GetDistanceFrom(BattleActor other)

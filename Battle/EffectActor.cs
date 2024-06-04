@@ -29,6 +29,8 @@ namespace BooBoo.Battle
         int barEndVal = 1;
         int barCurVal = 0;
 
+        public int renderPriority = 0;
+
         public static EffectActor BeginAnim(BattleActor parent, PrmAn prmAn, bool UI, string anim, bool loop)
         {
             EffectActor actor = new EffectActor(parent, prmAn, UI ? EffectType.UIAnim : EffectType.WorldSpaceAnim);
