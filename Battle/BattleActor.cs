@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using System.Linq;
 using BlakieLibSharp;
 using BooBoo.GameState;
 using BooBoo.Util;
@@ -476,6 +475,7 @@ namespace BooBoo.Battle
                 position.Y = 0.0f;
                 velocity.Y = 0.0f;
                 velocityMod.Y = 0.0f;
+                CallLuaFunc($"{curState}_Land", this);
                 if(hitstunState >= HitstunStates.CmnHurtLaunch && hitstunState <= HitstunStates.CmnHurtDiagonalSpin)
                 {
                     if(hitstunState == HitstunStates.CmnHurtTrip)
@@ -1035,6 +1035,8 @@ namespace BooBoo.Battle
         public void FaceActor(BattleActor actor)
         {
             dir = (Direction)MathF.Sign(GetDistanceFrom(actor).X);
+            if (dir == 0)
+                dir = player.dir;
         }
 
         public void RefreshHit()
