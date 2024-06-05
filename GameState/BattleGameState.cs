@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Numerics;
+using System.Linq;
 using BooBoo.Battle;
 using BooBoo.Util;
 using BooBoo.Engine;
@@ -9,7 +9,6 @@ using Newtonsoft.Json;
 using BlakieLibSharp;
 using Raylib_cs;
 using NLua;
-using System.Linq;
 
 namespace BooBoo.GameState
 {
@@ -105,6 +104,7 @@ namespace BooBoo.GameState
                     luaCode.DoString(charArc.GetFile(charLoad.Scripts[0]).DataAsString());
                     actor = new BattleActor(yuSprAn, charList, inputs[i], luaCode, "CmnStand", charLoad.RenderMode, charSprite, palTextures);
                     actor.SetEffects(effects);
+                    actor.SetSounds(sounds);
                     actors.Add(actor);
                 }
                 charArc.Dispose();
@@ -172,8 +172,11 @@ namespace BooBoo.GameState
                 Raylib.BeginTextureMode(charBoxTex);
                 Raylib.ClearBackground(Color.Blank);
                 Raylib.BeginMode3D(BattleCamera.activeCamera);
-                foreach (BattleActor actor in actorsToDraw)
+                foreach (IRenderableObject obj in actorsToDraw)
                 {
+                    BattleActor actor = obj as BattleActor;
+                    if (actor == null)
+                        continue;
                     if (actor.curFrame == null)
                         continue;
                     foreach (RectCollider rect in actor.curFrame.colliders)
@@ -192,7 +195,6 @@ namespace BooBoo.GameState
             foreach (IRenderableObject actor in actorsToDraw)
                 actor.Draw();
             Raylib.EndMode3D();
-            actorsToDraw.Clear();
             if (drawBoxes)
                 Raylib.DrawTextureRec(charBoxTex.Texture, new Rectangle(0, 0, charBoxTex.Texture.Width, -charBoxTex.Texture.Height), Vector2.Zero, Color.White);
             Window.FinalizeDrawing();
