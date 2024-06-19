@@ -19,6 +19,10 @@ function HitVector(x, y)
 	return Vector2(-x * oneSixteth, y * oneSixteth)
 	end
 
+function HitstunState(state)
+	return luanet.enum(HitstunStates, state)
+	end
+
 function BeginSuperFreeze(time, actor, effXPos, effYPos)
 	BattleGameState.BeginSuperFreeze(time, actor)
 	actor:SpawnEffect("SuperFreeze", effXPos, effYPos)

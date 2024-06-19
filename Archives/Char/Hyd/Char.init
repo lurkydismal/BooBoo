@@ -6,7 +6,7 @@
 	"Sprites": [
 		"Hyd_Spr00.dpspr"
 	],
-	"Effects": "",
+	"Effects": "Hyd_Eff00.prman",
 	"PalCount": 1,
 	"Palettes": [
 		{

@@ -119,7 +119,9 @@
 			"Priority": 1,
 			"CounterType": "Normal",
 			"HitOrBlockCancels": [
-				"NmlAtk5A2nd"
+				"NmlAtk5A2nd",
+				"NmlAtk5B",
+				"NmlAtk5C"
 			]
 		},
 		{
@@ -130,7 +132,9 @@
 			"CancelType": "OnlyWhenSpecified",
 			"CounterType": "Normal",
 			"HitOrBlockCancels": [
-				"NmlAtk5A3rd"
+				"NmlAtk5A3rd",
+				"NmlAtk5B",
+				"NmlAtk5C"
 			]
 		},
 		{
@@ -141,6 +145,16 @@
 			"CancelType": "OnlyWhenSpecified",
 			"CounterType": "Normal",
 			"HitOrBlockCancels": []
+		},
+		{
+			"Name": "NmlAtk5B",
+			"Input": "Standing_Any",
+			"Button": "B",
+			"Priority": 2,
+			"CounterType": "Normal",
+			"HitOrBlockCancels": [
+				"NmlAtk5C"
+			]
 		},
 		{
 			"Name": "NmlAtk5C",
@@ -168,6 +182,6 @@
 		"BlowbackLoopPos": 1,
 		"DiagonalSpinLoopPos": 0,
 		"WakeUpAirLoopPos": 4,
-		"WakeUpGroundLoopPos": 7
+		"WakeUpGroundLoopPos": 8
 	}
 }

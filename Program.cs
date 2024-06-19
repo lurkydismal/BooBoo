@@ -19,11 +19,8 @@ namespace BooBoo
             //if (args.Length > 0 && args[0] == "-Battle")
             if(true)
             {
-                Console.WriteLine("Num of players");
-                int playerNum = int.Parse(Console.ReadLine());
-
-                string[] chars = new string[playerNum];
-                for (int i = 0; i < playerNum; i++)
+                string[] chars = new string[2];
+                for (int i = 0; i < 2; i++)
                 {
                     Console.WriteLine($"Player {i} id");
                     chars[i] = Console.ReadLine();

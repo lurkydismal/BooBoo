@@ -20,6 +20,7 @@ namespace BooBoo.Battle
         PrmAn prmAn;
         EffectType effectType;
         EffectFlags effectFlags;
+        string actorState = "";
         string anim = "";
         int animTimer = 0;
         int animFrame = 0;
@@ -64,12 +65,20 @@ namespace BooBoo.Battle
             this.prmAn = prmAn;
             this.effectType = effectType;
             effectFlags = EffectFlags.HaveActorHitstop | EffectFlags.DeleteWhenActorGetsHit;
+            actorState = parent.curState;
         }
 
         public void Update(int barVal = 0) //only need to set to barCurVal if this is a bar
         {
             if (effectFlags.HasFlag(EffectFlags.HaveActorHitstop) && parent.hitstopTime > 0)
                 return;
+            if(effectFlags.HasFlag(EffectFlags.DeleteWhenActorSwitchesState) && actorState != parent.curState || 
+                effectFlags.HasFlag(EffectFlags.DeleteWhenActorGetsHit) && parent.hitstunState != HitstunStates.None)
+            {
+                parent.QueueDeleteEffect(anim);
+                return;
+            }    
+
             if(effectType == EffectType.UIBar ||  effectType == EffectType.WorldSpaceBar)
                 barCurVal = barVal;
             else if(effectType == EffectType.WorldSpaceAnim || effectType == EffectType.UIAnim)
@@ -160,14 +169,6 @@ namespace BooBoo.Battle
         {
             Vector3 screenScale = twoD ? new Vector3(Raylib.GetScreenWidth() / 1280.0f, Raylib.GetScreenHeight() / 720.0f, 0.0f) : Vector3.One;
 
-            if(layer.palNum >= 0)
-            {
-                Shader shader = (GameStateBase.gameState as BattleGameState).spriteShader;
-                int shaderLoc = (GameStateBase.gameState as BattleGameState).sprShaderPalLoc;
-                Raylib.SetShaderValueTexture(shader, shaderLoc, parent.palTextures[layer.palNum]);
-                Raylib.BeginShaderMode(shader);
-            }
-
             Rlgl.DisableBackfaceCulling();
             Rlgl.PushMatrix();
             Rlgl.Translatef((layer.position.X * (int)parent.dir + pos.X) * screenScale.X, (layer.position.Y + pos.Y) * screenScale.Y, layer.position.Z);
@@ -176,12 +177,19 @@ namespace BooBoo.Battle
             Rlgl.Rotatef(layer.rotation.Z * (int)parent.dir, 0.0f, 0.0f, 0.1f);
             Rlgl.Scalef(layer.scale.X * scale.X, layer.scale.Y * scale.Y, layer.scale.Z);
 
-
             if (layer.additive)
                 Raylib.BeginBlendMode(BlendMode.Additive);
 
             Rlgl.Color4f((layer.colMult[0] + layer.colAdd[0]) / 255.0f, (layer.colMult[1] + layer.colAdd[1]) / 255.0f,
                 (layer.colMult[2] + layer.colAdd[2]) / 255.0f, (layer.colMult[3] + layer.colAdd[3]) / 255.0f);
+
+            if(layer.palNum >= 0)
+            {
+                Shader shader = (GameStateBase.gameState as BattleGameState).spriteShader;
+                int shaderLoc = (GameStateBase.gameState as BattleGameState).sprShaderPalLoc;
+                Raylib.BeginShaderMode(shader);
+                Raylib.SetShaderValueTexture(shader, shaderLoc, parent.palTextures[layer.palNum]);
+            }
 
             Vector2 texSize;
             if (prmAn.textures.ContainsKey(layer.texId))

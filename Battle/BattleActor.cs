@@ -21,6 +21,7 @@ namespace BooBoo.Battle
         int IRenderableObject.renderPriority { get { return renderPriority; } set { renderPriority = value; } }
         public int renderPriority = 0;
         public Direction dir = Direction.Left;
+        public int dirInt { get { return (int)dir; } set { dir = (Direction)value; } }
         public int posSign { get { return MathF.Sign(position.X); } }
 
         public int curHealth = 1;
@@ -218,6 +219,8 @@ namespace BooBoo.Battle
 
                     actor.willBeHit = false;
 
+                    actor.CallLuaFunc("OnHit", actor, this);
+
                     //hit code
                     hitstopTime = hitstopOnHit;
                     AddHitOrBlockCancels();
@@ -238,7 +241,7 @@ namespace BooBoo.Battle
                     frameActiveTime++;
                     CallLuaFunc(curState + "_Tick", this);
                     if (states.HasState(curState) && states[curState].StateCanTurn)
-                        if (MathF.Sign(opponentDist.X) == -(int)dir)
+                        if (MathF.Sign(opponentDist.X) == -dirInt)
                         {
                             EnterState(states[curState].TurnState);
                             RemoveCancel(states[curState].NextState);
@@ -377,13 +380,14 @@ namespace BooBoo.Battle
                     if(HKDTime <= 0 && HasButtons(inputBuffer[0].button, ButtonType.A))
                     {
                         if (inputBuffer[0].IsLeft())
-                            velocity.X = -2.0f * oneSixteth;
+                            velocity.X = -3.5f * oneSixteth * dirInt;
                         else if (inputBuffer[0].IsRight())
-                            velocity.X = 2.0f * oneSixteth;
+                            velocity.X = 3.5f * oneSixteth * dirInt;
                         else
                             velocity.X = 0.0f;
-                        velocity.Y = 14.0f;
-                        velocityMod = new Vector3(0.0f, -0.7f, 0.0f);
+                        velocity.Y = 11.0f * oneSixteth;
+                        velocityMod = new Vector3(0.0f, -0.7f * oneSixteth, 0.0f);
+                        velocityMin = Vector3.Zero;
                         EnterState("CmnHurtWakeUpGround");
                         hitstunState = HitstunStates.CmnHurtWakeUpAir;
                         break;
@@ -464,7 +468,7 @@ namespace BooBoo.Battle
                 velocity.Y = velocityMin.Y;
                 velocityMod.Y = 0.0f;
             }
-            position += new Vector3(velocity.X * (int)dir, velocity.Y, velocity.Z);
+            position += new Vector3(velocity.X * dirInt, velocity.Y, velocity.Z);
             if(velocity.Y <= 0.0f && (hitstunState == HitstunStates.CmnHurtLaunch || hitstunState == HitstunStates.CmnHurtDiagonalSpin))
             {
                 EnterState("CmnHurtLaunchToFall");
@@ -488,6 +492,17 @@ namespace BooBoo.Battle
                         EnterState("CmnHurtLandFall");
                         hitstunState = HitstunStates.CmnHurtLandFall;
                     }
+                    velocity = Vector3.Zero;
+                    velocityMod = Vector3.Zero;
+                    velocityMin = Vector3.Zero;
+                }
+                else if(hitstunState == HitstunStates.CmnHurtWakeUpAir || hitstunState == HitstunStates.CmnHurtWakeUpGround)
+                {
+                    EnterState("CmnHurtWakeUpLand");
+                    hitstunState = HitstunStates.CmnHurtWakeUpLand;
+                    velocity = Vector3.Zero;
+                    velocityMod = Vector3.Zero;
+                    velocityMin = Vector3.Zero;
                 }
                 else if(states.HasState(curState))
                 {
@@ -689,11 +704,11 @@ namespace BooBoo.Battle
                     Rlgl.DisableBackfaceCulling();
                     Rlgl.PushMatrix();
                     {
-                        Rlgl.Translatef(position.X + uv.position.X * (int)dir, position.Y + uv.position.Y, position.Z);
+                        Rlgl.Translatef(position.X + uv.position.X * dirInt, position.Y + uv.position.Y, position.Z);
                         Rlgl.Rotatef(rotation.Y + uv.rotation.Y, 0.0f, 1.0f, 0.0f);
                         Rlgl.Rotatef(rotation.X + uv.rotation.X, 1.0f, 0.0f, 0.0f);
                         Rlgl.Rotatef(rotation.Z + uv.rotation.Z, 0.0f, 0.0f, 1.0f);
-                        Rlgl.Scalef(scale.X * uv.scale.X * (int)dir, scale.Y * uv.scale.Y, scale.Z);
+                        Rlgl.Scalef(scale.X * uv.scale.X * dirInt, scale.Y * uv.scale.Y, scale.Z);
 
                         Rlgl.Begin(DrawMode.Quads);
 
@@ -829,6 +844,9 @@ namespace BooBoo.Battle
             actor.dir = dir;
             actor.parent = this;
             actor.player = player;
+            actor.SetSounds(soundEffects);
+            actor.SetVoices(voiceLines);
+            actor.SetEffects(effects);
             children.Add(actor);
             gameState.actors.Add(actor);
             return actor;
@@ -846,9 +864,15 @@ namespace BooBoo.Battle
             velocityMod.Y = y * oneSixteth;
         }
 
+        public void SetVelocityMin(float x, float y)
+        {
+            velocityMin.X = x * oneSixteth;
+            velocityMin.Y = y * oneSixteth;
+        }
+
         public void AddPosition(float x, float y)
         {
-            position.X += x * (int)dir;
+            position.X += x * dirInt;
             position.Y += y;
         }
 
@@ -969,7 +993,7 @@ namespace BooBoo.Battle
             actor.dir = dir;
             actor.SetFlags(flags);
             if (flags.HasFlag(EffectActor.EffectFlags.FollowActorPos))
-                actor.position = new Vector3(offsetX * (int)dir, offsetY, 0.0f);
+                actor.position = new Vector3(offsetX * dirInt, offsetY, 0.0f);
             else
                 actor.position = position + new Vector3(offsetX, offsetY, 0.0f);
             effectsActive.Add(animName, actor);
@@ -1029,7 +1053,7 @@ namespace BooBoo.Battle
 
         public void Flip()
         {
-            dir = (Direction)((int)dir * -1);
+            dir = (Direction)(dirInt * -1);
         }
 
         public void FaceActor(BattleActor actor)

@@ -11,7 +11,7 @@ function MatchInit(actor)
 
 function SetPersonaMove(state, xOffset, yOffset, xMaxDist, yMaxDist)
 	if izActive == false or math.abs(yu:GetDistanceFrom(iz).X) >= xMaxDist or math.abs(yu:GetDistanceFrom(iz).Y) >= yMaxDist then
-		iz.position = Vector3(yu.position.X + xOffset, yu.position.Y + yOffset, 0.0)
+		iz.position = Vector3(yu.position.X + xOffset * yu.dirInt, yu.position.Y + yOffset, 0.0)
 		end
 	iz:FaceActor(yu.opponent)
 	iz:EnterState(state)
@@ -19,9 +19,19 @@ function SetPersonaMove(state, xOffset, yOffset, xMaxDist, yMaxDist)
 	end
 
 function Iz_Init(actor)
-	actor.renderPriority = -1
+	actor.renderPriority = -3
 	actor.curPalNum = 1
 	actor:EnterState("Iz_Wait")
+	end
+
+function OnHit(actor, attacker)
+	izActive = false
+	iz:EnterState("Iz_Wait")
+	iz.hitstopTime = 0
+	iz.hitstunState = HitstunState("None")
+	iz:SetVelocity(0.0, 0.0)
+	iz:SetVelocityMod(0.0, 0.0)
+	iz:SetVelocityMin(0.0, 0.0)
 	end
 
 function CmnStand_Loop(actor)
@@ -79,23 +89,34 @@ function CmnLand_Init(actor)
 	end
 
 function NmlAtk5A1st_Init(actor)
-	actor:AttackMacroWeak();
+	actor:AttackMacroWeak()
 	actor:FaceActor(actor.opponent)
 	end
 
 function NmlAtk5A2nd_Init(actor)
-	actor:AttackMacroMedium();
+	actor:AttackMacroMedium()
 	actor:FaceActor(actor.opponent)
 	end
 
 function NmlAtk5A3rd_Init(actor)
-	actor:AttackMacroHeavy();
+	actor:AttackMacroHeavy()
 	actor:FaceActor(actor.opponent)
 	end
 
 function NmlAtk5A3rd_Update(actor, frame)
 	if frame == 3 then
 		actor:SpawnEffect("bc202_eff", 0.0, 0.0)
+		end
+	end
+
+function NmlAtk5B_Init(actor)
+	actor:AttackMacroMedium()
+	actor.hitStateStanding = HitstunState("CmnHurtGutMedium")
+	end
+
+function NmlAtk5B_Update(actor, frame)
+	if frame == 4 then
+		actor:SpawnEffect("bc203_eff", 0.0, 0.0)
 		end
 	end
 
@@ -120,6 +141,8 @@ function Iz_Atk5C_Update(actor, frame)
 	elseif frame == 3 then
 		actor:SetVelocity(0.0, 0.0)
 		actor:SetVelocityMod(0.0, 0.0)
+		actor:SpawnEffect("iz204_eff", 0.0, 0.0)
+		actor:SetEffectRenderPriority("iz204_eff", actor.renderPriority + 1)
 	elseif frame == 12 then
 		actor.animBlending = true
 		end
@@ -127,6 +150,7 @@ function Iz_Atk5C_Update(actor, frame)
 
 function Iz_Atk5C_Hit(actor, hit)
 	yu:AddHitOrBlockCancels()
+	yu.hitstopTime = iz.hitstopOnHit
 	end
 
 function Iz_Atk5C_End(actor)
@@ -141,9 +165,9 @@ function CrossSlashC_Init(actor)
 	actor:AttackMacroHeavy()
 	actor.hitstopOnHit = 0
 	actor.hitstunOnHit = 9999
-	actor.hitStateStanding = luanet.enum(HitstunStates, "CmnHurtGutHeavy")
-	actor.hitStateCrouching = luanet.enum(HitstunStates, "CmnHurtGutHeavy")
-	actor.hitStateAerial = luanet.enum(HitstunStates, "CmnHurtGutHeavy")
+	actor.hitStateStanding = HitstunState("CmnHurtGutHeavy")
+	actor.hitStateCrouching = HitstunState("CmnHurtGutHeavy")
+	actor.hitStateAerial = HitstunState("CmnHurtGutHeavy")
 	actor.dirOnHitGround = HitVector(16.0, 0.0)
 	actor.dirOnHitAir = actor.dirOnHitGround
 	actor.dirModOnHitAir = actor.dirModOnHitGround
