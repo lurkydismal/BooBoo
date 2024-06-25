@@ -23,10 +23,7 @@ namespace BooBoo.Util
             path = GetFullPath(path);
             if (!File.Exists(path))
                 return null;
-            DPArc rtrn;
-            using (BinaryReader file = new BinaryReader(File.OpenRead(path)))
-                rtrn = new DPArc(file);
-            return rtrn;
+            return new DPArc(new BinaryReader(File.OpenRead(path)));
         }
 
         public static ArchiveFile LoadFileFromArchive(string fullPath)
@@ -49,7 +46,10 @@ namespace BooBoo.Util
                 using (DPArc arc = new DPArc(file))
                 {
                     if (arc.FileExists(fileName))
+                    {
                         rtrn = arc.GetFile(fileName);
+                        rtrn.LoadData();
+                    }
                     else
                         rtrn = null;
                 }
