@@ -2,6 +2,7 @@
 using System.Numerics;
 using BlakieLibSharp;
 using Raylib_cs;
+using Assimp;
 
 namespace BooBoo.Util
 {
@@ -58,6 +59,21 @@ namespace BooBoo.Util
         public static Vector3 ToVector3(this Vector2 vec, float z)
         {
             return new Vector3(vec.X, vec.Y, z);
+        }
+
+        public static Vector3 ToVector3(this Vector3D vec)
+        {
+            return new Vector3(vec.X, vec.Y, vec.Z);
+        }
+
+        public static Vector2 ToVector2(this Vector3D vec)
+        {
+            return new Vector2(vec.X, vec.Y);
+        }
+
+        public static Vector4 ToVector4(this Color4D color)
+        {
+            return new Vector4(color.R, color.G, color.B, color.A);
         }
     }
 }
