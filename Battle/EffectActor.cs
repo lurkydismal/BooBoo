@@ -9,7 +9,7 @@ using static BlakieLibSharp.PrmAn;
 namespace BooBoo.Battle
 {
     //this class is basically just ui drawer on drugs
-    internal class EffectActor : IRenderableObject
+    internal class EffectActor : IBattleRenderableObject
     {
         public Vector3 position = Vector3.Zero;
         public Vector3 rotation = Vector3.Zero;
@@ -30,7 +30,7 @@ namespace BooBoo.Battle
         int barEndVal = 1;
         int barCurVal = 0;
 
-        int IRenderableObject.renderPriority { get { return renderPriority; } set { renderPriority = value; } }
+        int IBattleRenderableObject.renderPriority { get { return renderPriority; } set { renderPriority = value; } }
         public int renderPriority = 1;
 
         public static EffectActor BeginAnim(BattleActor parent, PrmAn prmAn, bool UI, string anim, bool loop)

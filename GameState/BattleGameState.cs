@@ -151,7 +151,7 @@ namespace BooBoo.GameState
 
         public override void Draw()
         {
-            List<IRenderableObject> actorsToDraw = new List<IRenderableObject>();
+            List<IBattleRenderableObject> actorsToDraw = new List<IBattleRenderableObject>();
             foreach(BattleActor actor in actors)
             {
                 actorsToDraw.Add(actor);
@@ -172,7 +172,7 @@ namespace BooBoo.GameState
                 Raylib.BeginTextureMode(charBoxTex);
                 Raylib.ClearBackground(Color.Blank);
                 Raylib.BeginMode3D(BattleCamera.activeCamera);
-                foreach (IRenderableObject obj in actorsToDraw)
+                foreach (IBattleRenderableObject obj in actorsToDraw)
                 {
                     BattleActor actor = obj as BattleActor;
                     if (actor == null)
@@ -192,7 +192,7 @@ namespace BooBoo.GameState
             Raylib.DrawTextureRec(bgTex.Texture, new Rectangle(0, 0, bgTex.Texture.Width, -bgTex.Texture.Height), Vector2.Zero, Color.White);
             ui.DrawLayer1();
             Raylib.BeginMode3D(BattleCamera.activeCamera);
-            foreach (IRenderableObject actor in actorsToDraw)
+            foreach (IBattleRenderableObject actor in actorsToDraw)
                 actor.Draw();
             Raylib.EndMode3D();
             if (drawBoxes)

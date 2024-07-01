@@ -10,7 +10,7 @@ using NLua;
 
 namespace BooBoo.Battle
 {
-    internal class BattleActor : IRenderableObject
+    internal class BattleActor : IBattleRenderableObject
     {
         public Vector3 position = Vector3.Zero;
         public Vector3 velocity = Vector3.Zero;
@@ -18,7 +18,7 @@ namespace BooBoo.Battle
         public Vector3 velocityMin = Vector3.Zero; //will stop applying mod on vel if it reaches this threshold
         public Vector3 rotation = Vector3.Zero;
         public Vector3 scale = Vector3.One;
-        int IRenderableObject.renderPriority { get { return renderPriority; } set { renderPriority = value; } }
+        int IBattleRenderableObject.renderPriority { get { return renderPriority; } set { renderPriority = value; } }
         public int renderPriority = 0;
         public Direction dir = Direction.Left;
         public int dirInt { get { return (int)dir; } set { dir = (Direction)value; } }
