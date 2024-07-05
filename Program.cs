@@ -17,7 +17,7 @@ namespace BooBoo
             SystemManager.InitSystem();
 
             //if (args.Length > 0 && args[0] == "-Battle")
-            if (true)
+            if (false)
                 new ModelTestGameState().Init();
             else if(true)
             {

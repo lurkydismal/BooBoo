@@ -508,7 +508,10 @@ namespace BooBoo.Battle
                 {
                     StateList.State state = states.GetState(curState);
                     if (state.LandToState)
+                    {
                         EnterState(state.LandState);
+                        RemoveCancel(states.GetState(state.LandState).NextState);
+                    }
                 }
             }
 
